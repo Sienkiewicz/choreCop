@@ -1,11 +1,15 @@
 import cron from 'node-cron';
-import type { Telegraf } from 'telegraf';
+import type { Telegram } from 'telegraf';
 import Database from 'better-sqlite3';
 import { getAllFamilies } from '../db/families.js';
 import { generateDutiesForDate } from './generate.js';
 import { sendDailySummary, sendReminder } from './reminders.js';
 
-export function registerCronJobs(bot: Telegraf, db: Database.Database): void {
+interface BotLike {
+  telegram: Telegram;
+}
+
+export function registerCronJobs(bot: BotLike, db: Database.Database): void {
   cron.schedule('1 0 * * *', () => {
     const today = new Date();
     for (const family of getAllFamilies(db)) {

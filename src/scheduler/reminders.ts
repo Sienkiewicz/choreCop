@@ -1,12 +1,16 @@
-import type { Telegraf } from 'telegraf';
+import type { Telegraf, Telegram } from 'telegraf';
 import Database from 'better-sqlite3';
+
+interface BotLike {
+  telegram: Telegram;
+}
 import { getAllFamilies } from '../db/families.js';
 import { getDutiesForDate, getPendingDuties } from '../db/duties.js';
 import { saveSummaryMessageId, getSummaryMessageId } from '../db/summaries.js';
 import { buildSummaryMessage, buildReminderMessage } from '../bot/keyboards/duties.js';
 import { toDateStr } from './generate.js';
 
-export async function sendDailySummary(bot: Telegraf, db: Database.Database): Promise<void> {
+export async function sendDailySummary(bot: BotLike, db: Database.Database): Promise<void> {
   const today = toDateStr(new Date());
   for (const family of getAllFamilies(db)) {
     const duties = getDutiesForDate(db, family.id, today);
@@ -28,7 +32,7 @@ export async function sendDailySummary(bot: Telegraf, db: Database.Database): Pr
   }
 }
 
-export async function sendReminder(bot: Telegraf, db: Database.Database): Promise<void> {
+export async function sendReminder(bot: BotLike, db: Database.Database): Promise<void> {
   const today = toDateStr(new Date());
   for (const family of getAllFamilies(db)) {
     const pending = getPendingDuties(db, family.id, today);
@@ -47,7 +51,7 @@ export async function sendReminder(bot: Telegraf, db: Database.Database): Promis
 }
 
 export async function updatePinnedSummary(
-  bot: Telegraf,
+  bot: BotLike,
   db: Database.Database,
   familyId: number,
   chatId: number,
