@@ -3,7 +3,7 @@ import { Markup } from 'telegraf';
 import Database from 'better-sqlite3';
 import type { BotContext } from '../context.js';
 import { createRule, setFixedAssignments } from '../../db/rules.js';
-import { getActiveKids } from '../../db/families.js';
+import { getActiveKids, getAllMembers } from '../../db/families.js';
 import {
   initWizard, getWizard, updateWizard, clearWizard,
 } from '../state/wizard.js';
@@ -17,7 +17,29 @@ export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Da
     await ctx.answerCbQuery();
     await ctx.editMessageText('⚙️ Меню керування:', Markup.inlineKeyboard([
       [Markup.button.callback('➕ Додати завдання', 'admin:add_rule')],
+      [Markup.button.callback('👥 Члени сім\'ї', 'admin:members')],
     ]));
+  });
+
+  bot.action('admin:members', async (ctx) => {
+    await ctx.answerCbQuery();
+    if (!ctx.family) return;
+
+    const members = getAllMembers(db, ctx.family.id);
+    const roleLabel: Record<string, string> = { dad: '👨 Тато', mom: '👩 Мама', kid: '🧒 Дитина' };
+    const lines = members.map(m => {
+      const linked = m.telegram_id ? '🔗' : '⬜';
+      return `${linked} ${roleLabel[m.role] ?? m.role} — ${m.name}`;
+    });
+
+    const text = lines.length > 0
+      ? `👥 <b>Члени сім\'ї:</b>\n\n${lines.join('\n')}\n\n🔗 = прив\'язаний акаунт Telegram`
+      : '👥 Поки немає членів сім\'ї.';
+
+    await ctx.editMessageText(text, {
+      parse_mode: 'HTML',
+      ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ Назад', 'admin:menu')]]),
+    });
   });
 
   bot.action('admin:add_rule', async (ctx) => {
