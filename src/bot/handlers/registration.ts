@@ -20,7 +20,8 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
 
     const existing = ctx.family;
     if (existing) {
-      await ctx.reply('Сім\'ю вже налаштовано. Використовуйте /menu для керування.', adminMenuKeyboard());
+      const hasKids = getActiveKids(db, existing.id).length > 0;
+      await ctx.reply('Сім\'ю вже налаштовано. Використовуйте /menu для керування.', adminMenuKeyboard(hasKids));
       return;
     }
 
@@ -48,7 +49,7 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
     await ctx.editMessageText(
       `✅ Сім\'ю <b>${groupName}</b> створено! Ти доданий як Тато.\n\n` +
       `Тепер додай інших членів сім\'ї командою /add_member.`,
-      { parse_mode: 'HTML', ...adminMenuKeyboard() },
+      { parse_mode: 'HTML', ...adminMenuKeyboard(false) },
     );
   });
 
@@ -99,7 +100,8 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
       return;
     }
     if (ctx.member?.role !== 'dad' && ctx.member?.role !== 'mom') return;
-    await ctx.reply('⚙️ Меню керування:', adminMenuKeyboard());
+    const hasKids = getActiveKids(db, ctx.family.id).length > 0;
+    await ctx.reply('⚙️ Меню керування:', adminMenuKeyboard(hasKids));
   });
 
   bot.command('reset', async (ctx) => {

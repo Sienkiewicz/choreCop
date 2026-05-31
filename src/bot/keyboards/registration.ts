@@ -22,9 +22,9 @@ export function linkAccountKeyboard(unlinkedMembers: Member[]) {
   return Markup.inlineKeyboard(buttons);
 }
 
-export function adminMenuKeyboard() {
-  return Markup.inlineKeyboard([
-    [Markup.button.callback('➕ Додати завдання', 'admin:add_rule')],
-    [Markup.button.callback('👥 Члени сім\'ї', 'admin:members')],
-  ]);
+export function adminMenuKeyboard(hasKids: boolean) {
+  const buttons = [];
+  if (hasKids) buttons.push([Markup.button.callback('➕ Додати завдання', 'admin:add_rule')]);
+  buttons.push([Markup.button.callback('👥 Члени сім\'ї', 'admin:members')]);
+  return Markup.inlineKeyboard(buttons);
 }

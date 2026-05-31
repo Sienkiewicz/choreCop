@@ -15,10 +15,12 @@ import {
 export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Database): void {
   bot.action('admin:menu', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.editMessageText('⚙️ Меню керування:', Markup.inlineKeyboard([
-      [Markup.button.callback('➕ Додати завдання', 'admin:add_rule')],
-      [Markup.button.callback('👥 Члени сім\'ї', 'admin:members')],
-    ]));
+    if (!ctx.family) return;
+    const hasKids = getActiveKids(db, ctx.family.id).length > 0;
+    const buttons = [];
+    if (hasKids) buttons.push([Markup.button.callback('➕ Додати завдання', 'admin:add_rule')]);
+    buttons.push([Markup.button.callback('👥 Члени сім\'ї', 'admin:members')]);
+    await ctx.editMessageText('⚙️ Меню керування:', Markup.inlineKeyboard(buttons));
   });
 
   bot.action('admin:members', async (ctx) => {
