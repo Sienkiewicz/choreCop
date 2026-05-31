@@ -20,6 +20,7 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
 
     const existing = ctx.family;
     if (existing) {
+      if (ctx.member?.role !== 'dad') return;
       const hasKids = getActiveKids(db, existing.id).length > 0;
       await ctx.reply('Сім\'ю вже налаштовано. Використовуйте /menu для керування.', adminMenuKeyboard(hasKids));
       return;
