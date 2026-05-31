@@ -12,9 +12,9 @@ import { toDateStr } from './generate.js';
 
 export async function sendDailySummary(bot: BotLike, db: Database.Database): Promise<void> {
   const today = toDateStr(new Date());
-  for (const family of getAllFamilies(db)) {
+  getAllFamilies(db).forEach(async family => {
     const duties = getDutiesForDate(db, family.id, today);
-    if (duties.length === 0) continue;
+    if (duties.length === 0) return;
 
     const { text, reply_markup } = buildSummaryMessage(db, family.id, duties, today);
     try {
@@ -29,14 +29,14 @@ export async function sendDailySummary(bot: BotLike, db: Database.Database): Pro
     } catch (err) {
       console.error(`[reminders] failed to send summary to ${family.chat_id}:`, err);
     }
-  }
+  });
 }
 
 export async function sendReminder(bot: BotLike, db: Database.Database): Promise<void> {
   const today = toDateStr(new Date());
-  for (const family of getAllFamilies(db)) {
+  getAllFamilies(db).forEach(async family => {
     const pending = getPendingDuties(db, family.id, today);
-    if (pending.length === 0) continue;
+    if (pending.length === 0) return;
 
     const { text, reply_markup } = buildReminderMessage(db, family.id, pending, today);
     try {
@@ -47,7 +47,7 @@ export async function sendReminder(bot: BotLike, db: Database.Database): Promise
     } catch (err) {
       console.error(`[reminders] failed to send reminder to ${family.chat_id}:`, err);
     }
-  }
+  });
 }
 
 export async function updatePinnedSummary(

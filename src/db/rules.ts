@@ -27,7 +27,7 @@ export function setFixedAssignments(db: Database.Database, ruleId: number, membe
   const ins = db.prepare('INSERT INTO fixed_assignments (rule_id, member_id) VALUES (?, ?)');
   db.transaction(() => {
     del.run(ruleId);
-    for (const id of memberIds) ins.run(ruleId, id);
+    memberIds.forEach(id => ins.run(ruleId, id));
   })();
 }
 

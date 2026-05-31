@@ -21,9 +21,7 @@ registerCronJobs(bot, db);
 bot.launch().then(() => {
   console.log('ChoreCop is running');
   const today = new Date();
-  for (const family of getAllFamilies(db)) {
-    generateDutiesForDate(db, family.id, today);
-  }
+  getAllFamilies(db).forEach(family => generateDutiesForDate(db, family.id, today));
 });
 
 process.once('SIGINT', () => { bot.stop('SIGINT'); closeDb(); });

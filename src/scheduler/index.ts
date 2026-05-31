@@ -12,9 +12,7 @@ interface BotLike {
 export function registerCronJobs(bot: BotLike, db: Database.Database): void {
   cron.schedule('1 0 * * *', () => {
     const today = new Date();
-    for (const family of getAllFamilies(db)) {
-      generateDutiesForDate(db, family.id, today);
-    }
+    getAllFamilies(db).forEach(family => generateDutiesForDate(db, family.id, today));
   });
 
   cron.schedule('0 8 * * *', () => {

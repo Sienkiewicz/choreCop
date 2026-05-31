@@ -26,7 +26,7 @@ export function buildSummaryMessage(
   let text = `📋 <b>Чергування на сьогодні, ${day} ${month}:</b>\n\n`;
   const buttons: ReturnType<typeof Markup.button.callback>[][] = [];
 
-  for (const duty of duties) {
+  duties.forEach(duty => {
     const memberName = members[duty.member_id] ?? '???';
     const ruleName = rules[duty.rule_id] ?? '???';
     const statusEmoji = statusIcon(duty.status);
@@ -34,7 +34,7 @@ export function buildSummaryMessage(
     if (duty.status === 'pending') {
       buttons.push([Markup.button.callback(`✅ ${memberName} виконав`, `done:${duty.id}`)]);
     }
-  }
+  });
 
   return { text, reply_markup: Markup.inlineKeyboard(buttons).reply_markup };
 }
@@ -55,12 +55,12 @@ export function buildReminderMessage(
   let text = `⏰ <b>Нагадування — ще не виконано:</b>\n\n`;
   const buttons: ReturnType<typeof Markup.button.callback>[][] = [];
 
-  for (const duty of pendingDuties) {
+  pendingDuties.forEach(duty => {
     const memberName = members[duty.member_id] ?? '???';
     const ruleName = rules[duty.rule_id] ?? '???';
     text += `📌 ${ruleName} — ${memberName}\n`;
     buttons.push([Markup.button.callback(`✅ ${memberName} виконав`, `done:${duty.id}`)]);
-  }
+  });
 
   return { text, reply_markup: Markup.inlineKeyboard(buttons).reply_markup };
 }

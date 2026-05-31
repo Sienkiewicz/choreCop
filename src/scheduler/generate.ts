@@ -20,17 +20,15 @@ export function generateDutiesForDate(
   const rules = getActiveRules(db, familyId);
   const kids = getActiveKids(db, familyId);
 
-  for (const rule of rules) {
-    if (!matchesDate(rule.schedule, date)) continue;
-    if (hasDutyForDate(db, familyId, rule.id, dateStr)) continue;
+  rules.forEach(rule => {
+    if (!matchesDate(rule.schedule, date)) return;
+    if (hasDutyForDate(db, familyId, rule.id, dateStr)) return;
 
     const fixedAssignments = getFixedAssignments(db, rule.id);
     const rotationState = getRotationState(db, rule.id);
     const assigned = getAssignedMembers(rule, kids, fixedAssignments, rotationState);
 
-    for (const member of assigned) {
-      createDuty(db, familyId, rule.id, member.id, dateStr);
-    }
+    assigned.forEach(member => createDuty(db, familyId, rule.id, member.id, dateStr));
 
     if (rule.rotation_mode === 'round_robin' && kids.length > 0) {
       const newPos = advancePosition(
@@ -40,5 +38,5 @@ export function generateDutiesForDate(
       );
       upsertRotationState(db, rule.id, newPos, dateStr);
     }
-  }
+  });
 }
