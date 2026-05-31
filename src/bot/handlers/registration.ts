@@ -100,7 +100,7 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
       await ctx.reply('Спочатку налаштуйте сім\'ю командою /start.');
       return;
     }
-    if (ctx.member?.role !== 'dad' && ctx.member?.role !== 'mom') return;
+    if (ctx.member?.role !== 'dad') return;
     const hasKids = getActiveKids(db, ctx.family.id).length > 0;
     await ctx.reply('⚙️ Меню керування:', adminMenuKeyboard(hasKids));
   });
