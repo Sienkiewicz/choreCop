@@ -9,6 +9,8 @@ import { getActiveRules } from '../../db/rules.js';
 import { buildApprovalMessage } from '../keyboards/duties.js';
 import { updatePinnedSummary } from '../../scheduler/reminders.js';
 
+const parents = ['dad', 'mom'];
+
 export function registerDutyHandlers(bot: Telegraf<BotContext>, db: Database.Database): void {
   bot.action(/^done:(\d+)$/, async (ctx) => {
     await ctx.answerCbQuery();
@@ -22,7 +24,7 @@ export function registerDutyHandlers(bot: Telegraf<BotContext>, db: Database.Dat
     }
 
     const presser = ctx.member;
-    const isParent = presser?.role === 'dad' || presser?.role === 'mom';
+    const isParent = parents.includes(presser?.role ?? '');
     const isDutyPerson = presser?.id === duty.member_id;
 
     if (isDutyPerson || isParent) {
@@ -59,7 +61,7 @@ export function registerDutyHandlers(bot: Telegraf<BotContext>, db: Database.Dat
   bot.action(/^approve:(\d+)$/, async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.from || !ctx.family || !ctx.chat) return;
-    if (ctx.member?.role !== 'dad' && ctx.member?.role !== 'mom') {
+    if (!parents.includes(ctx.member?.role ?? '')) {
       await ctx.answerCbQuery('Тільки батьки можуть схвалювати.');
       return;
     }
@@ -76,7 +78,7 @@ export function registerDutyHandlers(bot: Telegraf<BotContext>, db: Database.Dat
   bot.action(/^reject:(\d+)$/, async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.from || !ctx.family || !ctx.chat) return;
-    if (ctx.member?.role !== 'dad' && ctx.member?.role !== 'mom') {
+    if (!parents.includes(ctx.member?.role ?? '')) {
       await ctx.answerCbQuery('Тільки батьки можуть відхиляти.');
       return;
     }
