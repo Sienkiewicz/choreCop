@@ -4,18 +4,12 @@ import type { BotContext } from '../context.js';
 import { generateDutiesForDate, toDateStr } from '../../scheduler/generate.js';
 import { sendDailySummary, sendReminder } from '../../scheduler/reminders.js';
 
-const DAY_OFFSETS: Record<string, number> = {
-  mon: 0, tue: 1, wed: 2, thu: 3, fri: 4, sat: 5, sun: 6,
-};
-
 function parseDate(args: string[]): { date: Date; dateStr: string } {
-  const arg = args[0]?.toLowerCase();
-  if (arg && arg in DAY_OFFSETS) {
-    const today = new Date();
-    const todayOffset = (today.getDay() + 6) % 7; // Mon=0 … Sun=6
-    const diff = DAY_OFFSETS[arg] - todayOffset;
-    const date = new Date(today);
-    date.setDate(today.getDate() + diff);
+  const arg = args[0];
+  const day = arg ? parseInt(arg, 10) : NaN;
+  if (!isNaN(day) && day >= 1 && day <= 31) {
+    const date = new Date();
+    date.setDate(day);
     return { date, dateStr: toDateStr(date) };
   }
   const date = new Date();
