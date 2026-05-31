@@ -15,6 +15,14 @@ export function addMemberRoleKeyboard(tempName: string) {
   ]);
 }
 
+export function joinKeyboard() {
+  return Markup.inlineKeyboard([
+    [Markup.button.callback('👨 Тато', 'join:dad')],
+    [Markup.button.callback('👩 Мама', 'join:mom')],
+    [Markup.button.callback('🧒 Дитина', 'join:kid')],
+  ]);
+}
+
 export function linkAccountKeyboard(unlinkedMembers: Member[]) {
   const buttons = unlinkedMembers.map(m => [
     Markup.button.callback(`👤 ${m.name}`, `link:${m.id}`),

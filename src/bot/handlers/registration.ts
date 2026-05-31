@@ -10,6 +10,7 @@ import { getActiveRules } from '../../db/rules.js';
 import { Markup } from 'telegraf';
 import {
   setupWelcomeKeyboard,
+  joinKeyboard,
   linkAccountKeyboard,
   adminMenuKeyboard,
 } from '../keyboards/registration.js';
@@ -48,8 +49,7 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
     if (ctx.from) linkMember(db, dad.id, ctx.from.id);
 
     await ctx.editMessageText(
-      `✅ Сім\'ю <b>${groupName}</b> створено! Ти доданий як Тато.\n\n` +
-      `Тепер додай інших членів сім\'ї командою /add_member.`,
+      `✅ Сім\'ю <b>${groupName}</b> створено! Ти доданий як Тато.\n\nВикористовуй меню щоб додати інших членів сім\'ї.`,
       { parse_mode: 'HTML', ...adminMenuKeyboard(false) },
     );
   });
@@ -93,6 +93,26 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
 
     const name = ctx.from.first_name;
     await ctx.reply(`✅ Акаунт <b>${name}</b> прив\'язано!`, { parse_mode: 'HTML' });
+  });
+
+  const ROLE_LABEL: Record<string, string> = { dad: 'Тато 👨', mom: 'Мама 👩', kid: 'Дитина 🧒' };
+
+  bot.action(/^join:(dad|mom|kid)$/, async (ctx) => {
+    await ctx.answerCbQuery();
+    if (!ctx.from || !ctx.family) return;
+
+    if (ctx.member) {
+      await ctx.answerCbQuery(`Ти вже в сім\'ї як ${ctx.member.name}!`);
+      return;
+    }
+
+    const name = ctx.from.first_name;
+    const role = ctx.match[1] as 'dad' | 'mom' | 'kid';
+    const kidCount = role === 'kid' ? getActiveKids(db, ctx.family.id).length : undefined;
+    const member = addMember(db, ctx.family.id, name, role, kidCount !== undefined ? kidCount + 1 : undefined);
+    linkMember(db, member.id, ctx.from.id);
+
+    await ctx.reply(`✅ <b>${name}</b> доданий як ${ROLE_LABEL[role]}!`, { parse_mode: 'HTML' });
   });
 
   bot.command('menu', async (ctx) => {

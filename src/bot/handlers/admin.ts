@@ -11,6 +11,7 @@ import {
   dayPickerKeyboard, workerCountKeyboard,
   splitDaysKeyboard, rotationModeKeyboard, fixedMembersKeyboard,
 } from '../keyboards/admin.js';
+import { joinKeyboard } from '../keyboards/registration.js';
 
 export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Database): void {
   bot.action('admin:menu', async (ctx) => {
@@ -46,12 +47,11 @@ export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Da
 
   bot.action('admin:add_member', async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.editMessageText(
-      '👤 <b>Додати учасника</b>\n\nНадішліть команду з іменем:\n<code>/add_member Ім\'я</code>\n\nНаприклад:\n<code>/add_member Аня</code>',
-      {
-        parse_mode: 'HTML',
-        ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ Назад', 'admin:menu')]]),
-      },
+    if (!ctx.chat) return;
+    await bot.telegram.sendMessage(
+      ctx.chat.id,
+      '👋 <b>Приєднайтесь до сім\'ї!</b>\n\nНатисніть свою роль:',
+      { parse_mode: 'HTML', ...joinKeyboard() },
     );
   });
 
