@@ -10,8 +10,8 @@ import { saveSummaryMessageId, getSummaryMessageId } from '../db/summaries.js';
 import { buildSummaryMessage, buildReminderMessage } from '../bot/keyboards/duties.js';
 import { toDateStr } from './generate.js';
 
-export async function sendDailySummary(bot: BotLike, db: Database.Database): Promise<void> {
-  const today = toDateStr(new Date());
+export async function sendDailySummary(bot: BotLike, db: Database.Database, date?: string): Promise<void> {
+  const today = date ?? toDateStr(new Date());
   getAllFamilies(db).forEach(async family => {
     const duties = getDutiesForDate(db, family.id, today);
     if (duties.length === 0) return;
@@ -32,8 +32,8 @@ export async function sendDailySummary(bot: BotLike, db: Database.Database): Pro
   });
 }
 
-export async function sendReminder(bot: BotLike, db: Database.Database): Promise<void> {
-  const today = toDateStr(new Date());
+export async function sendReminder(bot: BotLike, db: Database.Database, date?: string): Promise<void> {
+  const today = date ?? toDateStr(new Date());
   getAllFamilies(db).forEach(async family => {
     const pending = getPendingDuties(db, family.id, today);
     if (pending.length === 0) return;
