@@ -75,16 +75,17 @@ export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Da
 
   bot.action('rule:days:confirm', async (ctx) => {
     await ctx.answerCbQuery();
-    if (!ctx.chat) return;
+    if (!ctx.chat || !ctx.family) return;
     const state = getWizard(ctx.chat.id);
     if (!state || state.selectedDays.length === 0) {
       await ctx.answerCbQuery('Оберіть хоча б один день!');
       return;
     }
+    const kidCount = getActiveKids(db, ctx.family.id).length;
     updateWizard(ctx.chat.id, { step: 'workers' });
     await ctx.editMessageText(
       '👥 <b>Крок 2: Скільки дітей чергує за раз?</b>',
-      { parse_mode: 'HTML', ...workerCountKeyboard() },
+      { parse_mode: 'HTML', ...workerCountKeyboard(kidCount) },
     );
   });
 

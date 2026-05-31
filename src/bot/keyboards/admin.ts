@@ -23,11 +23,10 @@ export function dayPickerKeyboard(selectedDays: string[]) {
   return Markup.inlineKeyboard(rows);
 }
 
-export function workerCountKeyboard() {
+export function workerCountKeyboard(kidCount: number) {
+  const options = Array.from({ length: kidCount }, (_, i) => i + 1);
   return Markup.inlineKeyboard([
-    [1, 2, 3, 4].map(n =>
-      Markup.button.callback(`${n}`, `rule:workers:${n}`)
-    ),
+    options.map(n => Markup.button.callback(`${n}`, `rule:workers:${n}`)),
   ]);
 }
 
