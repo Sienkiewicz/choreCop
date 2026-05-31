@@ -66,3 +66,18 @@ export function getUnlinkedMembers(db: Database.Database, familyId: number): Mem
 export function getAllMembers(db: Database.Database, familyId: number): Member[] {
   return db.prepare('SELECT * FROM members WHERE family_id = ? AND active = 1').all(familyId) as Member[];
 }
+
+export function resetFamily(db: Database.Database, familyId: number): void {
+  db.transaction(() => {
+    db.prepare('DELETE FROM daily_summaries WHERE family_id = ?').run(familyId);
+    db.prepare('DELETE FROM duties WHERE family_id = ?').run(familyId);
+    const ruleIds = (db.prepare('SELECT id FROM work_rules WHERE family_id = ?').all(familyId) as { id: number }[]).map(r => r.id);
+    ruleIds.forEach(id => {
+      db.prepare('DELETE FROM rotation_state WHERE rule_id = ?').run(id);
+      db.prepare('DELETE FROM fixed_assignments WHERE rule_id = ?').run(id);
+    });
+    db.prepare('DELETE FROM work_rules WHERE family_id = ?').run(familyId);
+    db.prepare('DELETE FROM members WHERE family_id = ?').run(familyId);
+    db.prepare('DELETE FROM families WHERE id = ?').run(familyId);
+  })();
+}

@@ -6,7 +6,10 @@ import {
   addMember, linkMember,
   findMemberByTelegramId, getActiveKids,
   getParents, getUnlinkedMembers, getAllFamilies,
+  resetFamily,
 } from '../../src/db/families';
+import { createRule } from '../../src/db/rules';
+import { createDuty } from '../../src/db/duties';
 
 let db: Database.Database;
 
@@ -78,5 +81,21 @@ describe('members', () => {
     linkMember(db, m1.id, 5000);
     const unlinked = getUnlinkedMembers(db, familyId);
     expect(unlinked.map(m => m.name)).toEqual(['Іра']);
+  });
+});
+
+describe('resetFamily', () => {
+  it('removes family, members, rules, and duties', () => {
+    const family = upsertFamily(db, 200, 'Тест');
+    const kid = addMember(db, family.id, 'Аня', 'kid', 1);
+    const rule = createRule(db, family.id, 'Завдання 1', 'mon', 1, 'all');
+    createDuty(db, family.id, rule.id, kid.id, '2026-06-01');
+
+    resetFamily(db, family.id);
+
+    expect(findFamilyByChatId(db, 200)).toBeNull();
+    expect(db.prepare('SELECT * FROM members WHERE family_id = ?').all(family.id)).toHaveLength(0);
+    expect(db.prepare('SELECT * FROM work_rules WHERE family_id = ?').all(family.id)).toHaveLength(0);
+    expect(db.prepare('SELECT * FROM duties WHERE family_id = ?').all(family.id)).toHaveLength(0);
   });
 });

@@ -4,8 +4,10 @@ import type { BotContext } from '../context.js';
 import {
   upsertFamily, addMember, linkMember,
   getUnlinkedMembers, getActiveKids, getAllMembers,
+  resetFamily,
 } from '../../db/families.js';
 import { getActiveRules } from '../../db/rules.js';
+import { Markup } from 'telegraf';
 import {
   setupWelcomeKeyboard,
   linkAccountKeyboard,
@@ -98,6 +100,33 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
     }
     if (ctx.member?.role !== 'dad' && ctx.member?.role !== 'mom') return;
     await ctx.reply('⚙️ Меню керування:', adminMenuKeyboard());
+  });
+
+  bot.command('reset', async (ctx) => {
+    if (!ctx.family || ctx.member?.role !== 'dad') return;
+    await ctx.reply(
+      '⚠️ <b>Увага!</b> Це видалить усі дані сім\'ї: учасників, завдання, правила та історію чергувань. Дію неможливо скасувати.',
+      {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('🗑 Так, скинути все', 'reset:confirm')],
+          [Markup.button.callback('❌ Скасувати', 'reset:cancel')],
+        ]),
+      },
+    );
+  });
+
+  bot.action('reset:confirm', async (ctx) => {
+    await ctx.answerCbQuery();
+    if (!ctx.family || ctx.member?.role !== 'dad') return;
+    resetFamily(db, ctx.family.id);
+    ctx.family = null;
+    await ctx.editMessageText('✅ Дані сім\'ї видалено. Надішліть /start щоб почати заново.');
+  });
+
+  bot.action('reset:cancel', async (ctx) => {
+    await ctx.answerCbQuery('Скасовано.');
+    await ctx.deleteMessage();
   });
 
   bot.command('list_rules', async (ctx) => {
