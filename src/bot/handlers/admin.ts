@@ -44,6 +44,17 @@ export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Da
     });
   });
 
+  bot.action('admin:add_member', async (ctx) => {
+    await ctx.answerCbQuery();
+    await ctx.editMessageText(
+      '👤 <b>Додати учасника</b>\n\nНадішліть команду з іменем:\n<code>/add_member Ім\'я</code>\n\nНаприклад:\n<code>/add_member Аня</code>',
+      {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ Назад', 'admin:menu')]]),
+      },
+    );
+  });
+
   bot.action('admin:add_rule', async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.chat || !ctx.family) return;

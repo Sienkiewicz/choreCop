@@ -25,6 +25,7 @@ export function linkAccountKeyboard(unlinkedMembers: Member[]) {
 export function adminMenuKeyboard(hasKids: boolean) {
   const buttons = [];
   if (hasKids) buttons.push([Markup.button.callback('➕ Додати завдання', 'admin:add_rule')]);
+  buttons.push([Markup.button.callback('👤 Додати учасника', 'admin:add_member')]);
   buttons.push([Markup.button.callback('👥 Члени сім\'ї', 'admin:members')]);
   return Markup.inlineKeyboard(buttons);
 }
