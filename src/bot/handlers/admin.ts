@@ -2,7 +2,7 @@ import type { Telegraf } from 'telegraf';
 import { Markup } from 'telegraf';
 import Database from 'better-sqlite3';
 import type { BotContext } from '../context.js';
-import { createRule, setFixedAssignments } from '../../db/rules.js';
+import { createRule, setFixedAssignments, getActiveRules } from '../../db/rules.js';
 import { getActiveKids, getAllMembers } from '../../db/families.js';
 import {
   initWizard, getWizard, updateWizard, clearWizard,
@@ -50,7 +50,8 @@ export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Da
       return;
     }
 
-    initWizard(ctx.chat.id, 'Нове завдання');
+    const existingCount = getActiveRules(db, ctx.family.id).length;
+    initWizard(ctx.chat.id, `Завдання ${existingCount + 1}`);
     await ctx.editMessageText(
       '📅 <b>Крок 1: Оберіть дні тижня</b>\n\nНатискайте на дні, потім → Далі',
       { parse_mode: 'HTML', ...dayPickerKeyboard([]) },
