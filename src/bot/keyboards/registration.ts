@@ -1,5 +1,4 @@
 import { Markup } from 'telegraf';
-import type { Member } from '../../types.js';
 
 export function setupWelcomeKeyboard() {
   return Markup.inlineKeyboard([
@@ -9,25 +8,9 @@ export function setupWelcomeKeyboard() {
 
 export function addMemberRoleKeyboard(tempName: string) {
   return Markup.inlineKeyboard([
-    [Markup.button.callback('👨 Тато', `setup:role:${encodeURIComponent(tempName)}:dad`)],
     [Markup.button.callback('👩 Мама', `setup:role:${encodeURIComponent(tempName)}:mom`)],
     [Markup.button.callback('🧒 Дитина', `setup:role:${encodeURIComponent(tempName)}:kid`)],
   ]);
-}
-
-export function joinKeyboard() {
-  return Markup.inlineKeyboard([
-    [Markup.button.callback('👨 Тато', 'join:dad')],
-    [Markup.button.callback('👩 Мама', 'join:mom')],
-    [Markup.button.callback('🧒 Дитина', 'join:kid')],
-  ]);
-}
-
-export function linkAccountKeyboard(unlinkedMembers: Member[]) {
-  const buttons = unlinkedMembers.map(m => [
-    Markup.button.callback(`👤 ${m.name}`, `link:${m.id}`),
-  ]);
-  return Markup.inlineKeyboard(buttons);
 }
 
 export function adminMenuKeyboard(hasKids: boolean) {

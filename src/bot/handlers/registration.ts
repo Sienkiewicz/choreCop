@@ -3,17 +3,26 @@ import Database from 'better-sqlite3';
 import type { BotContext } from '../context.js';
 import {
   upsertFamily, addMember, linkMember,
-  getUnlinkedMembers, getActiveKids, getAllMembers,
+  getActiveKids, getAllMembers,
   resetFamily,
 } from '../../db/families.js';
 import { getActiveRules } from '../../db/rules.js';
 import { Markup } from 'telegraf';
 import {
   setupWelcomeKeyboard,
-  joinKeyboard,
-  linkAccountKeyboard,
+  addMemberRoleKeyboard,
   adminMenuKeyboard,
 } from '../keyboards/registration.js';
+
+async function isGroupAdmin(ctx: BotContext): Promise<boolean> {
+  if (!ctx.chat || !ctx.from) return false;
+  try {
+    const member = await ctx.getChatMember(ctx.from.id);
+    return member.status === 'administrator' || member.status === 'creator';
+  } catch {
+    return false;
+  }
+}
 
 export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Database.Database): void {
   bot.command('start', async (ctx) => {
@@ -27,6 +36,8 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
       return;
     }
 
+    if (!(await isGroupAdmin(ctx))) return;
+
     await ctx.reply(
       '👋 Вітаю! Я ChoreCop — бот для розподілу домашніх обов\'язків.\n\nНатисніть кнопку, щоб налаштувати сім\'ю:',
       setupWelcomeKeyboard(),
@@ -36,6 +47,7 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
   bot.action('setup:start', async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.chat) return;
+    if (!(await isGroupAdmin(ctx))) return;
 
     const groupName = ctx.chat.type !== 'private' && 'title' in ctx.chat
       ? ctx.chat.title
@@ -58,7 +70,7 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
     if (!ctx.family || ctx.member?.role !== 'dad') return;
     const args = ctx.message.text.split(' ').slice(1);
     if (args.length === 0) {
-      await ctx.reply('Використання: /add_member Ім\'я\nНаприклад: /add_member Аня');
+      await ctx.reply('Використання: /add_member @нікнейм або /add_member Ім\'я\nНаприклад: /add_member @anya або /add_member Аня');
       return;
     }
     const name = args.join(' ');
@@ -68,51 +80,20 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
     );
   });
 
-  bot.action(/^setup:role:(.+):(dad|mom|kid)$/, async (ctx) => {
+  bot.action(/^setup:role:(.+):(mom|kid)$/, async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.family || ctx.member?.role !== 'dad') return;
 
     const name = decodeURIComponent(ctx.match[1]);
-    const role = ctx.match[2] as 'dad' | 'mom' | 'kid';
+    const role = ctx.match[2] as 'mom' | 'kid';
     const kidCount = role === 'kid' ? getActiveKids(db, ctx.family.id).length : undefined;
     addMember(db, ctx.family.id, name, role, kidCount !== undefined ? kidCount + 1 : undefined);
 
-    const unlinked = getUnlinkedMembers(db, ctx.family.id);
+    const roleLabel = role === 'mom' ? 'Мама 👩' : 'Дитина 🧒';
     await ctx.editMessageText(
-      `✅ Додано: <b>${name}</b>\n\nЩоб прив\'язати акаунт Telegram, нехай ${name} натисне свою кнопку:`,
-      { parse_mode: 'HTML', ...linkAccountKeyboard(unlinked) },
+      `✅ <b>${name}</b> доданий як ${roleLabel}.`,
+      { parse_mode: 'HTML' },
     );
-  });
-
-  bot.action(/^link:(\d+)$/, async (ctx) => {
-    await ctx.answerCbQuery();
-    if (!ctx.from || !ctx.family) return;
-
-    const memberId = parseInt(ctx.match[1], 10);
-    linkMember(db, memberId, ctx.from.id);
-
-    const name = ctx.from.first_name;
-    await ctx.reply(`✅ Акаунт <b>${name}</b> прив\'язано!`, { parse_mode: 'HTML' });
-  });
-
-  const ROLE_LABEL: Record<string, string> = { dad: 'Тато 👨', mom: 'Мама 👩', kid: 'Дитина 🧒' };
-
-  bot.action(/^join:(dad|mom|kid)$/, async (ctx) => {
-    await ctx.answerCbQuery();
-    if (!ctx.from || !ctx.family) return;
-
-    if (ctx.member) {
-      await ctx.answerCbQuery(`Ти вже в сім\'ї як ${ctx.member.name}!`);
-      return;
-    }
-
-    const name = ctx.from.first_name;
-    const role = ctx.match[1] as 'dad' | 'mom' | 'kid';
-    const kidCount = role === 'kid' ? getActiveKids(db, ctx.family.id).length : undefined;
-    const member = addMember(db, ctx.family.id, name, role, kidCount !== undefined ? kidCount + 1 : undefined);
-    linkMember(db, member.id, ctx.from.id);
-
-    await ctx.reply(`✅ <b>${name}</b> доданий як ${ROLE_LABEL[role]}!`, { parse_mode: 'HTML' });
   });
 
   bot.command('menu', async (ctx) => {

@@ -11,8 +11,6 @@ import {
   dayPickerKeyboard, workerCountKeyboard,
   splitDaysKeyboard, rotationModeKeyboard, fixedMembersKeyboard,
 } from '../keyboards/admin.js';
-import { joinKeyboard } from '../keyboards/registration.js';
-
 export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Database): void {
   bot.action('admin:menu', async (ctx) => {
     await ctx.answerCbQuery();
@@ -20,6 +18,7 @@ export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Da
     const hasKids = getActiveKids(db, ctx.family.id).length > 0;
     const buttons = [];
     if (hasKids) buttons.push([Markup.button.callback('➕ Додати завдання', 'admin:add_rule')]);
+    buttons.push([Markup.button.callback('👤 Додати учасника', 'admin:add_member')]);
     buttons.push([Markup.button.callback('👥 Члени сім\'ї', 'admin:members')]);
     await ctx.editMessageText('⚙️ Меню керування:', Markup.inlineKeyboard(buttons));
   });
@@ -47,11 +46,9 @@ export function registerAdminHandlers(bot: Telegraf<BotContext>, db: Database.Da
 
   bot.action('admin:add_member', async (ctx) => {
     await ctx.answerCbQuery();
-    if (!ctx.chat) return;
-    await bot.telegram.sendMessage(
-      ctx.chat.id,
-      '👋 <b>Приєднайтесь до сім\'ї!</b>\n\nНатисніть свою роль:',
-      { parse_mode: 'HTML', ...joinKeyboard() },
+    await ctx.reply(
+      '👤 <b>Додати учасника</b>\n\nНадішліть команду:\n/add_member @нікнейм\nабо\n/add_member Ім\'я\n\nПотім оберіть роль.',
+      { parse_mode: 'HTML' },
     );
   });
 
