@@ -67,6 +67,9 @@ export async function updatePinnedSummary(
       reply_markup,
       parse_mode: 'HTML',
     });
+    if (duties.length > 0 && duties.every(d => d.status === 'done')) {
+      await bot.telegram.unpinChatMessage(chatId, msgId);
+    }
   } catch {
     // Message may be too old or unchanged — ignore
   }
