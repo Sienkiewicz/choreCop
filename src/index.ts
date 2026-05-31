@@ -4,6 +4,8 @@ import { getDb, closeDb } from './db/index.js';
 import { registerCronJobs } from './scheduler/index.js';
 import { registerHandlers } from './bot/handlers/index.js';
 import { familyMiddleware } from './bot/middleware/family.js';
+import { getAllFamilies } from './db/families.js';
+import { generateDutiesForDate } from './scheduler/generate.js';
 import type { BotContext } from './bot/context.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -16,7 +18,13 @@ bot.use(familyMiddleware(db));
 registerHandlers(bot, db);
 registerCronJobs(bot, db);
 
-bot.launch().then(() => console.log('ChoreCop is running'));
+bot.launch().then(() => {
+  console.log('ChoreCop is running');
+  const today = new Date();
+  for (const family of getAllFamilies(db)) {
+    generateDutiesForDate(db, family.id, today);
+  }
+});
 
 process.once('SIGINT', () => { bot.stop('SIGINT'); closeDb(); });
 process.once('SIGTERM', () => { bot.stop('SIGTERM'); closeDb(); });
