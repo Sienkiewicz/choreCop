@@ -12,11 +12,10 @@ import { getActiveRules } from '../../db/rules.js';
 
 function parseDate(args: string[]): { date: Date; dateStr: string } {
   const arg = args[0];
-  const day = arg ? parseInt(arg, 10) : NaN;
-  if (!isNaN(day) && day >= 1 && day <= 31) {
-    const date = new Date();
-    date.setDate(day);
-    return { date, dateStr: toDateStr(date) };
+  if (arg && /^\d{2}-\d{2}-\d{4}$/.test(arg)) {
+    const [dd, mm, yyyy] = arg.split('-');
+    const date = new Date(`${yyyy}-${mm}-${dd}`);
+    if (!isNaN(date.getTime())) return { date, dateStr: `${yyyy}-${mm}-${dd}` };
   }
   const date = new Date();
   return { date, dateStr: toDateStr(date) };
