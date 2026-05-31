@@ -3,8 +3,9 @@ import Database from 'better-sqlite3';
 import type { BotContext } from '../context.js';
 import {
   upsertFamily, addMember, linkMember,
-  getUnlinkedMembers, getActiveKids,
+  getUnlinkedMembers, getActiveKids, getAllMembers,
 } from '../../db/families.js';
+import { getActiveRules } from '../../db/rules.js';
 import {
   setupWelcomeKeyboard,
   linkAccountKeyboard,
@@ -97,5 +98,38 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
     }
     if (ctx.member?.role !== 'dad' && ctx.member?.role !== 'mom') return;
     await ctx.reply('⚙️ Меню керування:', adminMenuKeyboard());
+  });
+
+  bot.command('list_rules', async (ctx) => {
+    if (!ctx.family) {
+      await ctx.reply('Спочатку налаштуйте сім\'ю командою /start.');
+      return;
+    }
+    if (ctx.member?.role !== 'dad' && ctx.member?.role !== 'mom') return;
+
+    const rules = getActiveRules(db, ctx.family.id);
+    if (rules.length === 0) {
+      await ctx.reply('📋 Завдань ще немає. Додайте через ⚙️ Меню.');
+      return;
+    }
+
+    const members = Object.fromEntries(
+      getAllMembers(db, ctx.family.id).map(m => [m.id, m.name])
+    );
+    const modeLabel: Record<string, string> = {
+      round_robin: '🔄 По черзі',
+      fixed: '📌 Фіксовані',
+      all: '👥 Всі діти',
+    };
+
+    const lines = rules.map(r => {
+      const days = r.schedule.split(',').join(', ');
+      const mode = modeLabel[r.rotation_mode] ?? r.rotation_mode;
+      return `📌 <b>${r.name}</b>\n   Дні: ${days} · ${mode} · ${r.workers_count} чол.`;
+    });
+
+    await ctx.reply(`📋 <b>Активні завдання (${rules.length}):</b>\n\n${lines.join('\n\n')}`, {
+      parse_mode: 'HTML',
+    });
   });
 }
