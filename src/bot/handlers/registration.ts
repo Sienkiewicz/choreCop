@@ -57,12 +57,24 @@ export function registerRegistrationHandlers(bot: Telegraf<BotContext>, db: Data
       return;
     }
     const name = args.join(' ');
-    const kidCount = getActiveKids(db, ctx.family.id).length;
-    addMember(db, ctx.family.id, name, 'kid', kidCount + 1);
+    await ctx.reply(
+      `👤 <b>${name}</b> — оберіть роль:`,
+      { parse_mode: 'HTML', ...addMemberRoleKeyboard(name) },
+    );
+  });
+
+  bot.action(/^setup:role:(.+):(dad|mom|kid)$/, async (ctx) => {
+    await ctx.answerCbQuery();
+    if (!ctx.family || ctx.member?.role !== 'dad') return;
+
+    const name = decodeURIComponent(ctx.match[1]);
+    const role = ctx.match[2] as 'dad' | 'mom' | 'kid';
+    const kidCount = role === 'kid' ? getActiveKids(db, ctx.family.id).length : undefined;
+    addMember(db, ctx.family.id, name, role, kidCount !== undefined ? kidCount + 1 : undefined);
 
     const unlinked = getUnlinkedMembers(db, ctx.family.id);
-    await ctx.reply(
-      `✅ Додано члена сім\'ї: <b>${name}</b>\n\nЩоб прив\'язати акаунт Telegram, нехай ${name} натисне свою кнопку:`,
+    await ctx.editMessageText(
+      `✅ Додано: <b>${name}</b>\n\nЩоб прив\'язати акаунт Telegram, нехай ${name} натисне свою кнопку:`,
       { parse_mode: 'HTML', ...linkAccountKeyboard(unlinked) },
     );
   });
