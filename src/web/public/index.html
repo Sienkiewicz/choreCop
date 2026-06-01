@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChoreCop</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Setup screen -->
+<div id="screen-setup" class="screen">
+  <h2>🏠 Налаштування сім'ї</h2>
+  <div class="form-group">
+    <label>Назва сім'ї</label>
+    <input id="family-name" type="text" placeholder="Наприклад: Сім'я Коваль" />
+  </div>
+  <button id="btn-create-family" class="btn">Створити сім'ю</button>
+  <div id="setup-error" class="error-msg"></div>
+</div>
+
+<!-- Members screen -->
+<div id="screen-members" class="screen">
+  <h2>👥 Члени сім'ї</h2>
+
+  <div class="card" id="members-list">
+    <div class="spinner">Завантаження…</div>
+  </div>
+
+  <div class="add-section">
+    <span class="collapse-toggle" onclick="toggleCollapse('add-member-form')">+ Додати учасника</span>
+    <div id="add-member-form" class="collapse-content">
+      <div class="form-group">
+        <label>Ім'я або @нікнейм</label>
+        <input id="new-member-name" type="text" placeholder="Наприклад: Аня або @anya" />
+      </div>
+      <div class="form-group">
+        <label>Роль</label>
+        <div class="role-picker">
+          <button class="role-btn" data-role="mom">👩 Мама</button>
+          <button class="role-btn selected" data-role="kid">🧒 Дитина</button>
+        </div>
+      </div>
+      <div id="member-error" class="error-msg"></div>
+      <button id="btn-add-member" class="btn">Додати</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button id="btn-go-rules" class="btn secondary">📋 Завдання →</button>
+  </div>
+</div>
+
+<!-- Rules screen -->
+<div id="screen-rules" class="screen">
+  <h2>📋 Завдання</h2>
+
+  <div class="card" id="rules-list">
+    <div class="spinner">Завантаження…</div>
+  </div>
+
+  <div class="add-section">
+    <span class="collapse-toggle" onclick="toggleCollapse('add-rule-form')">+ Нове завдання</span>
+    <div id="add-rule-form" class="collapse-content">
+      <div class="form-group">
+        <label>Назва</label>
+        <input id="new-rule-name" type="text" placeholder="Наприклад: Посудомийна" />
+      </div>
+      <div class="form-group">
+        <label>Дні тижня</label>
+        <div class="day-picker" id="day-picker"></div>
+      </div>
+      <div class="form-group">
+        <label>Кількість чергових</label>
+        <input id="rule-workers" type="number" min="1" max="10" value="1" />
+      </div>
+      <div class="form-group">
+        <label>Тип ротації</label>
+        <select id="rule-rotation">
+          <option value="round_robin">🔄 По черзі</option>
+          <option value="all">👥 Всі діти</option>
+          <option value="fixed">📌 Фіксовані</option>
+        </select>
+      </div>
+      <div id="rule-error" class="error-msg"></div>
+      <button id="btn-add-rule" class="btn">Зберегти завдання</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

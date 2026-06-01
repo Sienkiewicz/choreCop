@@ -7,8 +7,9 @@ import {
   getDutiesForDate, getDutyById,
   markDone, requestApproval, approveOrReject,
 } from '../../db/duties.js';
-import { getAllMembers, getParents } from '../../db/families.js';
-import { getActiveRules } from '../../db/rules.js';
+import { getAllMembers, getParents, upsertFamily, addMember, linkMember, getActiveKids } from '../../db/families.js';
+import { getActiveRules, createRule } from '../../db/rules.js';
+import type { WorkRule } from '../../types.js';
 
 function parseDate(args: string[]): { date: Date; dateStr: string } {
   const arg = args[0];
@@ -29,6 +30,54 @@ const STATUS_ICON: Record<string, string> = {
 };
 
 export function registerDevHandlers(bot: Telegraf<BotContext>, db: Database.Database): void {
+  bot.command('dev_setup', async (ctx) => {
+    if (!ctx.chat || !ctx.from) return;
+    const groupName = 'title' in ctx.chat ? ctx.chat.title : 'Test Family';
+    const family = upsertFamily(db, ctx.chat.id, groupName);
+    const existing = getAllMembers(db, family.id).find(m => m.telegram_id === ctx.from!.id);
+    if (existing) {
+      await ctx.reply(`[DEV] Family already exists. You are "${existing.name}" (${existing.role}).`);
+      return;
+    }
+    const dad = addMember(db, family.id, ctx.from.first_name, 'dad');
+    linkMember(db, dad.id, ctx.from.id);
+    await ctx.reply(`[DEV] Family "${groupName}" created. You are dad (${ctx.from.first_name}).`);
+  });
+
+  bot.command('dev_add_member', async (ctx) => {
+    if (!ctx.family) { await ctx.reply('[DEV] Run /dev_setup first.'); return; }
+    const args = ctx.message.text.split(' ').slice(1);
+    const role = args[args.length - 1] as 'mom' | 'kid';
+    if (!['mom', 'kid'].includes(role)) {
+      await ctx.reply('[DEV] Usage: /dev_add_member <name> <mom|kid>');
+      return;
+    }
+    const name = args.slice(0, -1).join(' ');
+    if (!name) { await ctx.reply('[DEV] Usage: /dev_add_member <name> <mom|kid>'); return; }
+    const kidOrder = role === 'kid' ? getActiveKids(db, ctx.family.id).length + 1 : undefined;
+    const member = addMember(db, ctx.family.id, name, role, kidOrder);
+    await ctx.reply(`[DEV] Added "${member.name}" as ${member.role}.`);
+  });
+
+  bot.command('dev_add_rule', async (ctx) => {
+    if (!ctx.family) { await ctx.reply('[DEV] Run /dev_setup first.'); return; }
+    const args = ctx.message.text.split(' ').slice(1);
+    if (args.length < 4) {
+      await ctx.reply('[DEV] Usage: /dev_add_rule <name> <schedule> <workers> <round_robin|all|fixed>\nExample: /dev_add_rule Dishes daily 1 round_robin');
+      return;
+    }
+    const mode = args[args.length - 1] as WorkRule['rotation_mode'];
+    const workers = parseInt(args[args.length - 2], 10);
+    const schedule = args[args.length - 3];
+    const name = args.slice(0, -3).join(' ');
+    if (!['round_robin', 'all', 'fixed'].includes(mode) || isNaN(workers)) {
+      await ctx.reply('[DEV] Invalid args. Mode must be round_robin|all|fixed.');
+      return;
+    }
+    const rule = createRule(db, ctx.family.id, name, schedule, workers, mode);
+    await ctx.reply(`[DEV] Rule "${rule.name}" created — ${schedule}, ${workers} worker(s), ${mode}.`);
+  });
+
   bot.command('dev_generate', async (ctx) => {
     if (!ctx.family) return;
     const args = ctx.message.text.split(' ').slice(1);

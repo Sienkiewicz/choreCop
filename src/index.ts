@@ -6,6 +6,7 @@ import { registerHandlers } from './bot/handlers/index.js';
 import { familyMiddleware } from './bot/middleware/family.js';
 import { getAllFamilies } from './db/families.js';
 import { generateDutiesForDate } from './scheduler/generate.js';
+import { startWebServer } from './web/server.js';
 import type { BotContext } from './bot/context.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -22,6 +23,7 @@ bot.launch().then(() => {
   console.log('ChoreCop is running');
   const today = new Date();
   getAllFamilies(db).forEach(family => generateDutiesForDate(db, family.id, today));
+  startWebServer(db, parseInt(process.env.PORT ?? '3000', 10));
 });
 
 process.once('SIGINT', () => { bot.stop('SIGINT'); closeDb(); });

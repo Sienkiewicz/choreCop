@@ -61,7 +61,7 @@ export function registerDutyHandlers(bot: Telegraf<BotContext>, db: Database.Dat
   bot.action(/^approve:(\d+)$/, async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.from || !ctx.family || !ctx.chat) return;
-    if (!parents.includes(ctx.member?.role ?? '')) {
+    if (!ctx.member || !parents.includes(ctx.member.role)) {
       await ctx.answerCbQuery('Тільки батьки можуть схвалювати.');
       return;
     }
@@ -78,7 +78,7 @@ export function registerDutyHandlers(bot: Telegraf<BotContext>, db: Database.Dat
   bot.action(/^reject:(\d+)$/, async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.from || !ctx.family || !ctx.chat) return;
-    if (!parents.includes(ctx.member?.role ?? '')) {
+    if (!ctx.member || !parents.includes(ctx.member.role)) {
       await ctx.answerCbQuery('Тільки батьки можуть відхиляти.');
       return;
     }

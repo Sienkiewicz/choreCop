@@ -14,6 +14,19 @@ export function findFamilyByChatId(db: Database.Database, chatId: number): Famil
   return (db.prepare('SELECT * FROM families WHERE chat_id = ?').get(chatId) as Family) ?? null;
 }
 
+export function findFamilyByMemberTelegramId(
+  db: Database.Database,
+  telegramId: number,
+): { family: Family; member: Member } | null {
+  const member = db.prepare(
+    'SELECT * FROM members WHERE telegram_id = ? AND active = 1 LIMIT 1'
+  ).get(telegramId) as Member | undefined;
+  if (!member) return null;
+  const family = db.prepare('SELECT * FROM families WHERE id = ?').get(member.family_id) as Family | undefined;
+  if (!family) return null;
+  return { family, member };
+}
+
 export function getAllFamilies(db: Database.Database): Family[] {
   return db.prepare('SELECT * FROM families').all() as Family[];
 }

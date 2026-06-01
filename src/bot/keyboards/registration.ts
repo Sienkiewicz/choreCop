@@ -6,17 +6,8 @@ export function setupWelcomeKeyboard() {
   ]);
 }
 
-export function addMemberRoleKeyboard(tempName: string) {
+export function miniAppKeyboard(url: string) {
   return Markup.inlineKeyboard([
-    [Markup.button.callback('👩 Мама', `setup:role:${encodeURIComponent(tempName)}:mom`)],
-    [Markup.button.callback('🧒 Дитина', `setup:role:${encodeURIComponent(tempName)}:kid`)],
+    [Markup.button.webApp('⚙️ Відкрити налаштування', url)],
   ]);
-}
-
-export function adminMenuKeyboard(hasKids: boolean) {
-  const buttons = [];
-  if (hasKids) buttons.push([Markup.button.callback('➕ Додати завдання', 'admin:add_rule')]);
-  buttons.push([Markup.button.callback('👤 Додати учасника', 'admin:add_member')]);
-  buttons.push([Markup.button.callback('👥 Члени сім\'ї', 'admin:members')]);
-  return Markup.inlineKeyboard(buttons);
 }
