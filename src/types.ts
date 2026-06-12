@@ -1,4 +1,4 @@
-export interface Family {
+export interface Group {
   id: number;
   chat_id: number;
   name: string;
@@ -7,21 +7,23 @@ export interface Family {
 
 export interface Member {
   id: number;
-  family_id: number;
+  group_id: number;
   telegram_id: number | null;
+  username: string | null;
   name: string;
-  role: 'dad' | 'mom' | 'kid';
+  role: "dad" | "mom" | "kid";
+  gender: "male" | "female";
   kid_order: number | null;
   active: number;
 }
 
 export interface WorkRule {
   id: number;
-  family_id: number;
+  group_id: number;
   name: string;
   schedule: string;
   workers_count: number;
-  rotation_mode: 'round_robin' | 'fixed' | 'all';
+  rotation_mode: "round_robin" | "fixed" | "all";
   active: number;
 }
 
@@ -39,19 +41,28 @@ export interface RotationState {
 
 export interface Duty {
   id: number;
-  family_id: number;
+  group_id: number;
   rule_id: number;
   member_id: number;
   duty_date: string;
-  status: 'pending' | 'approval_pending' | 'done' | 'rejected';
+  status: "pending" | "approval_pending" | "done" | "rejected";
   requested_by: number | null;
   approved_by: number | null;
+  done_by: number | null;
   done_at: number | null;
   created_at: number;
 }
 
 export interface DailySummary {
-  family_id: number;
+  group_id: number;
   duty_date: string;
   message_id: number;
+}
+
+export interface BotMessage {
+  id: number;
+  group_id: number;
+  chat_id: number;
+  message_id: number;
+  created_at: number;
 }

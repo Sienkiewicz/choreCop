@@ -1,7 +1,7 @@
-import type { Context } from 'telegraf';
-import type { Family, Member } from '../types.js';
+import type { Context } from "telegraf";
+import type { Group, Member } from "../types.js";
 
 export interface BotContext extends Context {
-  family: Family | null;
+  group: Group | null;
   member: Member | null;
 }
