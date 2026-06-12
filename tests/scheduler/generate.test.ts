@@ -22,7 +22,9 @@ beforeEach(() => {
   kid3Id = addMember(db, groupId, "Іра", "kid", 3).id;
   kid4Id = addMember(db, groupId, "Том", "kid", 4).id;
 });
-afterEach(() => db.close());
+afterEach(() => {
+  db.close();
+});
 
 const SAT = new Date("2026-05-30");
 const MON = new Date("2026-06-01");

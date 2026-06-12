@@ -21,7 +21,9 @@ let db: Database.Database;
 beforeEach(() => {
   db = createTestDb();
 });
-afterEach(() => db.close());
+afterEach(() => {
+  db.close();
+});
 
 describe("groups", () => {
   it("upsertGroup creates a new group", () => {

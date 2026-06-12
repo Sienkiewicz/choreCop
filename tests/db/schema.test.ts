@@ -9,7 +9,9 @@ beforeEach(() => {
   db.pragma("foreign_keys = ON");
 });
 
-afterEach(() => db.close());
+afterEach(() => {
+  db.close();
+});
 
 describe("applySchema", () => {
   it("creates all required tables", () => {

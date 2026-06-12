@@ -18,7 +18,9 @@ beforeEach(() => {
   groupId = upsertGroup(db, 1, "Test").id;
   kidId = addMember(db, groupId, "Аня", "kid", 1).id;
 });
-afterEach(() => db.close());
+afterEach(() => {
+  db.close();
+});
 
 describe("createRule", () => {
   it("creates a work rule", () => {

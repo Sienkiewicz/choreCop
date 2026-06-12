@@ -32,7 +32,9 @@ beforeEach(() => {
   parentId = addMember(db, groupId, "Тато", "dad").id;
   ruleId = createRule(db, groupId, "Посудомийна", "daily", 1, "round_robin").id;
 });
-afterEach(() => db.close());
+afterEach(() => {
+  db.close();
+});
 
 describe("duties", () => {
   it("createDuty inserts a pending duty", () => {
