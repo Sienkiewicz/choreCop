@@ -8,6 +8,7 @@ import {
 } from "../src/db/groups.js";
 import { createRule, getActiveRules } from "../src/db/rules.js";
 import type { WorkRule } from "../src/types.js";
+import { Role, RotationMode } from "../src/types.js";
 
 const db = getDb();
 const [, , command, ...args] = process.argv;
@@ -50,24 +51,23 @@ switch (command) {
     const name = args[1];
     if (!name) usage();
     const g = upsertGroup(db, chatId, name);
-    const existing = getAllMembers(db, g.id).find((m) => m.role === "dad");
+    const existing = getAllMembers(db, g.id).find((m) => m.role === Role.Dad);
     if (existing) {
       console.log(`Group "${g.name}" already exists. Dad: ${existing.name}`);
     } else {
-      addMember(db, g.id, "Тато", "dad");
+      addMember(db, g.id, "Тато", Role.Dad);
       console.log(`✅ Group "${g.name}" created with dad.`);
     }
     break;
   }
 
   case "add-member": {
-    const name = args[1];
-    const role = args[2] as "mom" | "kid";
-    if (!name || !["mom", "kid"].includes(role)) usage();
+    const [, name, role] = args;
+    if (!name || !([Role.Mom, Role.Kid] as string[]).includes(role)) usage();
     const g = group();
     const kidOrder =
-      role === "kid" ? getActiveKids(db, g.id).length + 1 : undefined;
-    const member = addMember(db, g.id, name, role, kidOrder);
+      role === Role.Kid ? getActiveKids(db, g.id).length + 1 : undefined;
+    const member = addMember(db, g.id, name, role as Role, kidOrder);
     console.log(
       `✅ Added "${member.name}" as ${member.role}${kidOrder ? ` (kid #${kidOrder})` : ""}.`,
     );
@@ -81,7 +81,13 @@ switch (command) {
       !name ||
       !schedule ||
       isNaN(workers) ||
-      !["round_robin", "all", "fixed"].includes(mode)
+      !(
+        [
+          RotationMode.RoundRobin,
+          RotationMode.All,
+          RotationMode.Fixed,
+        ] as string[]
+      ).includes(mode)
     )
       usage();
     const g = group();

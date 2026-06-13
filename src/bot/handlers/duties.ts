@@ -15,6 +15,7 @@ import {
   getParents,
 } from "../../db/groups.js";
 import { getActiveRules } from "../../db/rules.js";
+import { Role, DutyStatus } from "../../types.js";
 import {
   buildApprovalMessage,
   buildTaskListMessage,
@@ -22,7 +23,7 @@ import {
 import { updatePinnedSummary } from "../../scheduler/reminders.js";
 import { trackAndPrune } from "../helpers/messages.js";
 
-const parents = ["dad", "mom"];
+const parents: Role[] = [Role.Dad, Role.Mom];
 
 async function handleMarkDone(
   bot: Telegraf<BotContext>,
@@ -36,7 +37,7 @@ async function handleMarkDone(
   }
 
   const duty = getDutyById(db, dutyId);
-  if (!duty || duty.status === "done") {
+  if (!duty || duty.status === DutyStatus.Done) {
     await ctx.answerCbQuery("Це завдання вже виконано.");
     return;
   }
@@ -49,7 +50,7 @@ async function handleMarkDone(
 
   const presser = findMemberByTelegramId(db, group.id, ctx.from.id);
   const isDutyPerson = presser?.id === duty.member_id;
-  const isParent = parents.includes(presser?.role ?? "");
+  const isParent = presser ? parents.includes(presser.role) : false;
 
   if (isDutyPerson || isParent) {
     markDone(db, duty.id, presser!.id);
@@ -60,7 +61,7 @@ async function handleMarkDone(
       await ctx.answerCbQuery("Ваш акаунт не прив'язано до групи.");
       return;
     }
-    if (duty.status === "approval_pending") {
+    if (duty.status === DutyStatus.ApprovalPending) {
       await ctx.answerCbQuery();
       return;
     }
@@ -83,7 +84,7 @@ async function handleMarkDone(
     );
 
     const dads = getParents(db, group.id).filter(
-      (p) => p.role === "dad" && p.telegram_id,
+      (p) => p.role === Role.Dad && p.telegram_id,
     );
     if (dads.length > 0) {
       for (const dad of dads) {

@@ -16,6 +16,7 @@ import {
 } from "../../db/duties.js";
 import { getAllMembers, getParents } from "../../db/groups.js";
 import { getActiveRules } from "../../db/rules.js";
+import { Role, DutyStatus } from "../../types.js";
 
 function parseDate(args: string[]): { date: Date; dateStr: string } {
   const arg = args[0];
@@ -29,10 +30,10 @@ function parseDate(args: string[]): { date: Date; dateStr: string } {
 }
 
 const STATUS_ICON: Record<string, string> = {
-  pending: "⬜",
-  approval_pending: "⏳",
-  done: "✅",
-  rejected: "❌",
+  [DutyStatus.Pending]: "⬜",
+  [DutyStatus.ApprovalPending]: "⏳",
+  [DutyStatus.Done]: "✅",
+  [DutyStatus.Rejected]: "❌",
 };
 
 export function registerDevHandlers(
@@ -122,7 +123,7 @@ export function registerDevHandlers(
       return;
     }
     const kids = getAllMembers(db, ctx.group.id).filter(
-      (m) => m.role === "kid" && m.id !== duty.member_id,
+      (m) => m.role === Role.Kid && m.id !== duty.member_id,
     );
     const requester = kids[0];
     if (!requester) {

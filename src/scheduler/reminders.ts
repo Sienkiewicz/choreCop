@@ -4,6 +4,7 @@ import Database from "better-sqlite3";
 interface BotLike {
   telegram: Telegram;
 }
+import { DutyStatus } from "../types.js";
 import { getAllGroups } from "../db/groups.js";
 import { getDutiesForDate, getPendingDuties } from "../db/duties.js";
 import { saveSummaryMessageId, getSummaryMessageId } from "../db/summaries.js";
@@ -130,7 +131,10 @@ export async function updatePinnedSummary(
       reply_markup,
       parse_mode: "HTML",
     });
-    if (duties.length > 0 && duties.every((d) => d.status === "done")) {
+    if (
+      duties.length > 0 &&
+      duties.every((d) => d.status === DutyStatus.Done)
+    ) {
       await bot.telegram.unpinChatMessage(chatId, msgId);
     }
   } catch {

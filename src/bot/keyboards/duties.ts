@@ -1,6 +1,7 @@
 import { Markup } from "telegraf";
 import Database from "better-sqlite3";
 import type { Duty, Member } from "../../types.js";
+import { DutyStatus, Gender } from "../../types.js";
 import { getAllMembers } from "../../db/groups.js";
 import { getActiveRules } from "../../db/rules.js";
 
@@ -14,17 +15,17 @@ export function memberTag(m: Member): string {
 }
 
 export function doneLabel(m: Member): string {
-  const verb = m.gender === "female" ? "виконала" : "виконав";
+  const verb = m.gender === Gender.Female ? "виконала" : "виконав";
   return `${memberTag(m)} ${verb}`;
 }
 
 function statusIcon(status: Duty["status"]): string {
   switch (status) {
-    case "done":
+    case DutyStatus.Done:
       return "✅";
-    case "approval_pending":
+    case DutyStatus.ApprovalPending:
       return "⏳";
-    case "rejected":
+    case DutyStatus.Rejected:
       return "❌";
     default:
       return "⬜";
@@ -87,7 +88,9 @@ export function buildSummaryMessage(
   }
 
   const hasPending = duties.some(
-    (d) => d.status === "pending" || d.status === "approval_pending",
+    (d) =>
+      d.status === DutyStatus.Pending ||
+      d.status === DutyStatus.ApprovalPending,
   );
   const buttons = hasPending
     ? [[Markup.button.callback("✅ Позначити виконане", `menu:done:${date}`)]]

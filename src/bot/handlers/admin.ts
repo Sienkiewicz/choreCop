@@ -21,7 +21,9 @@ import {
   getWizard,
   updateWizard,
   clearWizard,
+  WizardStep,
 } from "../state/wizard.js";
+import { Role, RotationMode } from "../../types.js";
 import {
   namePickerKeyboard,
   dayPickerKeyboard,
@@ -94,7 +96,7 @@ export function registerAdminHandlers(
         .join(", ");
       const mode = MODE_LABEL[r.rotation_mode] ?? r.rotation_mode;
       let line = `📌 <b>${r.name}</b>\n   Дні: ${days} · ${mode} · ${r.workers_count} чол.`;
-      if (r.rotation_mode === "fixed") {
+      if (r.rotation_mode === RotationMode.Fixed) {
         const names = getFixedAssignments(db, r.id).map(
           (fa) => membersMap[fa.member_id] ?? "?",
         );
@@ -228,7 +230,7 @@ export function registerAdminHandlers(
 
   bot.action("admin:reset:confirm", async (ctx) => {
     await ctx.answerCbQuery();
-    if (!ctx.group || ctx.member?.role !== "dad") return;
+    if (!ctx.group || ctx.member?.role !== Role.Dad) return;
 
     const groupId = ctx.group.id;
     const name = ctx.from?.first_name ?? "Тато";
@@ -236,7 +238,7 @@ export function registerAdminHandlers(
 
     clearGroup(db, groupId);
 
-    const dad = addMember(db, groupId, name, "dad");
+    const dad = addMember(db, groupId, name, Role.Dad);
     if (telegramId) linkMember(db, dad.id, telegramId);
     ctx.member = { ...dad, telegram_id: telegramId ?? null };
 
@@ -253,7 +255,7 @@ export function registerAdminHandlers(
   bot.action("admin:add_rule", async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.chat || !ctx.group) return;
-    if (ctx.member?.role !== "dad" && ctx.member?.role !== "mom") {
+    if (ctx.member?.role !== Role.Dad && ctx.member?.role !== Role.Mom) {
       await ctx.answerCbQuery("Тільки батьки можуть керувати завданнями.");
       return;
     }
@@ -280,7 +282,7 @@ export function registerAdminHandlers(
         });
         break;
       case "days":
-        updateWizard(ctx.chat.id, { step: "days" });
+        updateWizard(ctx.chat.id, { step: WizardStep.Days });
         await ctx.editMessageText(
           `📅 <b>${state.ruleName} — Крок 2: Оберіть дні тижня</b>\n\nНатискайте на дні, потім → Далі`,
           { parse_mode: "HTML", ...dayPickerKeyboard(state.selectedDays) },
@@ -288,7 +290,7 @@ export function registerAdminHandlers(
         break;
       case "workers": {
         const kidCount = getActiveKids(db, ctx.group.id).length;
-        updateWizard(ctx.chat.id, { step: "workers" });
+        updateWizard(ctx.chat.id, { step: WizardStep.Workers });
         await ctx.editMessageText(
           "👥 <b>Крок 2: Скільки дітей чергує за раз?</b>",
           { parse_mode: "HTML", ...workerCountKeyboard(kidCount) },
@@ -297,7 +299,7 @@ export function registerAdminHandlers(
       }
       case "split":
         if (state.remainingDays.length > 0) {
-          updateWizard(ctx.chat.id, { step: "subset_days" });
+          updateWizard(ctx.chat.id, { step: WizardStep.SubsetDays });
           await ctx.editMessageText(
             `🔀 <b>${state.ruleName} — Оберіть дні для групи:</b>\n\nОберіть дні з однаковим розкладом чергування, потім → Далі`,
             {
@@ -309,7 +311,7 @@ export function registerAdminHandlers(
             },
           );
         } else {
-          updateWizard(ctx.chat.id, { step: "split" });
+          updateWizard(ctx.chat.id, { step: WizardStep.Split });
           await ctx.editMessageText(
             "📆 <b>Крок 3: Однакові умови для всіх вибраних днів?</b>",
             { parse_mode: "HTML", ...splitDaysKeyboard() },
@@ -318,7 +320,7 @@ export function registerAdminHandlers(
         break;
       case "split_subset":
         updateWizard(ctx.chat.id, {
-          step: "split",
+          step: WizardStep.Split,
           remainingDays: [],
           currentSubsetDays: [],
           completedSubsets: [],
@@ -329,7 +331,7 @@ export function registerAdminHandlers(
         );
         break;
       case "rotation": {
-        updateWizard(ctx.chat.id, { step: "rotation" });
+        updateWizard(ctx.chat.id, { step: WizardStep.Rotation });
         const text =
           state.remainingDays.length > 0
             ? `🔄 <b>Тип ротації для: ${dayNames(state.currentSubsetDays)}</b>`
@@ -364,7 +366,7 @@ export function registerAdminHandlers(
 
     const name = RULE_NAME_PRESETS[parseInt(raw, 10)];
     if (!name) return;
-    updateWizard(ctx.chat.id, { ruleName: name, step: "days" });
+    updateWizard(ctx.chat.id, { ruleName: name, step: WizardStep.Days });
     await ctx.editMessageText(
       `📅 <b>${name} — Крок 2: Оберіть дні тижня</b>\n\nНатискайте на дні, потім → Далі`,
       { parse_mode: "HTML", ...dayPickerKeyboard([]) },
@@ -374,7 +376,7 @@ export function registerAdminHandlers(
   bot.command("rule_name", async (ctx) => {
     if (!ctx.chat || !ctx.group) return;
     const state = getWizard(ctx.chat.id);
-    if (!state || state.step !== "name") return;
+    if (!state || state.step !== WizardStep.Name) return;
 
     const name = ctx.message.text.split(" ").slice(1).join(" ").trim();
     if (!name) {
@@ -389,7 +391,7 @@ export function registerAdminHandlers(
       return;
     }
 
-    updateWizard(ctx.chat.id, { ruleName: name, step: "days" });
+    updateWizard(ctx.chat.id, { ruleName: name, step: WizardStep.Days });
     const msg = await ctx.reply(
       `📅 <b>${name} — Крок 2: Оберіть дні тижня</b>\n\nНатискайте на дні, потім → Далі`,
       { parse_mode: "HTML", ...dayPickerKeyboard([]) },
@@ -427,7 +429,7 @@ export function registerAdminHandlers(
       return;
     }
     const kidCount = getActiveKids(db, ctx.group.id).length;
-    updateWizard(ctx.chat.id, { step: "workers" });
+    updateWizard(ctx.chat.id, { step: WizardStep.Workers });
     await ctx.editMessageText(
       "👥 <b>Крок 2: Скільки дітей чергує за раз?</b>",
       { parse_mode: "HTML", ...workerCountKeyboard(kidCount) },
@@ -442,7 +444,7 @@ export function registerAdminHandlers(
 
     updateWizard(ctx.chat.id, {
       workersCount: parseInt(ctx.match[1], 10),
-      step: "split",
+      step: WizardStep.Split,
     });
     await ctx.editMessageText(
       "📆 <b>Крок 3: Однакові умови для всіх вибраних днів?</b>",
@@ -454,7 +456,7 @@ export function registerAdminHandlers(
     await ctx.answerCbQuery();
     if (!ctx.chat) return;
     updateWizard(ctx.chat.id, {
-      step: "rotation",
+      step: WizardStep.Rotation,
       remainingDays: [],
       currentSubsetDays: [],
       completedSubsets: [],
@@ -472,7 +474,7 @@ export function registerAdminHandlers(
     if (!state) return;
 
     updateWizard(ctx.chat.id, {
-      step: "subset_days",
+      step: WizardStep.SubsetDays,
       remainingDays: [...state.selectedDays],
       currentSubsetDays: [],
       completedSubsets: [],
@@ -518,7 +520,7 @@ export function registerAdminHandlers(
     }
 
     await ctx.answerCbQuery();
-    updateWizard(ctx.chat.id, { step: "rotation" });
+    updateWizard(ctx.chat.id, { step: WizardStep.Rotation });
     await ctx.editMessageText(
       `🔄 <b>Тип ротації для: ${dayNames(state.currentSubsetDays)}</b>`,
       { parse_mode: "HTML", ...rotationModeKeyboard() },
@@ -531,13 +533,16 @@ export function registerAdminHandlers(
     const state = getWizard(ctx.chat.id);
     if (!state) return;
 
-    const mode = ctx.match[1] as "round_robin" | "fixed" | "all";
+    const mode = ctx.match[1] as RotationMode;
     const splitMode = state.remainingDays.length > 0;
     updateWizard(ctx.chat.id, { rotationMode: mode });
 
-    if (mode === "fixed") {
+    if (mode === RotationMode.Fixed) {
       const kids = getActiveKids(db, ctx.group.id);
-      updateWizard(ctx.chat.id, { step: "fixed_members", fixedMembers: [] });
+      updateWizard(ctx.chat.id, {
+        step: WizardStep.FixedMembers,
+        fixedMembers: [],
+      });
       const header = splitMode
         ? `👤 <b>Оберіть чергових на: ${dayNames(state.currentSubsetDays)}</b>`
         : "👤 <b>Крок 5: Оберіть фіксованих чергових</b>";
@@ -589,7 +594,7 @@ export function registerAdminHandlers(
     if (!state) return;
 
     if (state.remainingDays.length > 0) {
-      await completeSubset(ctx, db, "fixed", state.fixedMembers);
+      await completeSubset(ctx, db, RotationMode.Fixed, state.fixedMembers);
     } else {
       await showConfirmation(ctx, db);
     }
@@ -611,7 +616,7 @@ export function registerAdminHandlers(
   bot.action("rule:restart", async (ctx) => {
     await ctx.answerCbQuery();
     if (!ctx.chat || !ctx.group) return;
-    if (ctx.member?.role !== "dad" && ctx.member?.role !== "mom") return;
+    if (ctx.member?.role !== Role.Dad && ctx.member?.role !== Role.Mom) return;
 
     initWizard(ctx.chat.id);
     await ctx.editMessageText("📝 <b>Крок 1: Оберіть назву завдання</b>", {
@@ -629,7 +634,7 @@ async function showConfirmation(
   const state = getWizard(ctx.chat.id);
   if (!state) return;
 
-  updateWizard(ctx.chat.id, { step: "confirm" });
+  updateWizard(ctx.chat.id, { step: WizardStep.Confirm });
 
   const kids = getActiveKids(db, ctx.group.id);
   const membersMap = Object.fromEntries(kids.map((k) => [k.id, k.name]));
@@ -639,7 +644,7 @@ async function showConfirmation(
     summary = state.completedSubsets
       .map((subset) => {
         let line = `${dayNames(subset.days)}: ${MODE_LABEL[subset.rotationMode]}`;
-        if (subset.rotationMode === "fixed") {
+        if (subset.rotationMode === RotationMode.Fixed) {
           const names = subset.fixedMembers
             .map((id) => membersMap[id] ?? "?")
             .join(", ");
@@ -649,9 +654,9 @@ async function showConfirmation(
       })
       .join("\n");
   } else {
-    const mode = state.rotationMode ?? "round_robin";
+    const mode = state.rotationMode ?? RotationMode.RoundRobin;
     summary = `📅 Дні: ${dayNames(state.selectedDays)}\n🔄 Тип: ${MODE_LABEL[mode]}`;
-    if (mode === "fixed") {
+    if (mode === RotationMode.Fixed) {
       const names = state.fixedMembers
         .map((id) => membersMap[id] ?? "?")
         .join(", ");
@@ -680,7 +685,7 @@ async function saveRule(ctx: BotContext, db: Database.Database) {
     state.rotationMode,
   );
 
-  if (state.rotationMode === "fixed") {
+  if (state.rotationMode === RotationMode.Fixed) {
     setFixedAssignments(db, rule.id, state.fixedMembers);
   }
 
@@ -700,7 +705,7 @@ async function saveRule(ctx: BotContext, db: Database.Database) {
 async function completeSubset(
   ctx: BotContext,
   db: Database.Database,
-  mode: "round_robin" | "fixed" | "all",
+  mode: RotationMode,
   fixedMembers: number[],
 ): Promise<void> {
   if (!ctx.chat || !ctx.group) return;
@@ -734,7 +739,7 @@ async function completeSubset(
     completedSubsets,
     remainingDays,
     currentSubsetDays: [],
-    step: "subset_days",
+    step: WizardStep.SubsetDays,
   });
   await ctx.editMessageText(
     `🔀 <b>${state.ruleName} — Залишилось налаштувати дні:</b>\n\nОберіть дні з однаковим розкладом чергування, потім → Далі`,
@@ -764,11 +769,11 @@ async function saveSplitRules(
       subset.workersCount,
       subset.rotationMode,
     );
-    if (subset.rotationMode === "fixed") {
+    if (subset.rotationMode === RotationMode.Fixed) {
       setFixedAssignments(db, rule.id, subset.fixedMembers);
     }
     let line = `${dayNames(subset.days)}: ${MODE_LABEL[subset.rotationMode]}`;
-    if (subset.rotationMode === "fixed") {
+    if (subset.rotationMode === RotationMode.Fixed) {
       const names = subset.fixedMembers
         .map((id) => membersMap[id] ?? "?")
         .join(", ");

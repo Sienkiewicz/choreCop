@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import { RotationMode } from "../types.js";
 import { getActiveRules, getFixedAssignments } from "../db/rules.js";
 import { getActiveKids } from "../db/groups.js";
 import { createDuty, hasDutyForDate } from "../db/duties.js";
@@ -40,7 +41,7 @@ export function generateDutiesForDate(
       createDuty(db, groupId, rule.id, member.id, dateStr),
     );
 
-    if (rule.rotation_mode === "round_robin" && kids.length > 0) {
+    if (rule.rotation_mode === RotationMode.RoundRobin && kids.length > 0) {
       const newPos = advancePosition(
         rotationState?.current_pos ?? 0,
         kids.length,

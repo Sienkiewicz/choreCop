@@ -1,5 +1,6 @@
 import { Markup } from "telegraf";
 import type { Member, WorkRule } from "../../types.js";
+import { Role, RotationMode } from "../../types.js";
 
 export const RULE_NAME_PRESETS = [
   "Посудомийна",
@@ -31,15 +32,15 @@ export const DAY_LABELS: Record<string, string> = {
 };
 
 export const MODE_LABEL: Record<string, string> = {
-  round_robin: "🔄 По черзі",
-  fixed: "📌 Фіксовані",
-  all: "👥 Всі діти",
+  [RotationMode.RoundRobin]: "🔄 По черзі",
+  [RotationMode.Fixed]: "📌 Фіксовані",
+  [RotationMode.All]: "👥 Всі діти",
 };
 
 export const ROLE_LABEL: Record<string, string> = {
-  dad: "👨 Тато",
-  mom: "👩 Мама",
-  kid: "🧒 Дитина",
+  [Role.Dad]: "👨 Тато",
+  [Role.Mom]: "👩 Мама",
+  [Role.Kid]: "🧒 Дитина",
 };
 
 export function dayNames(days: string[]): string {

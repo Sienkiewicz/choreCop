@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import type { Group, Member } from "../types.js";
+import { Gender } from "../types.js";
 
 export function upsertGroup(
   db: Database.Database,
@@ -63,7 +64,7 @@ export function addMember(
   role: Member["role"],
   kidOrder?: number,
   username?: string,
-  gender: Member["gender"] = "male",
+  gender: Member["gender"] = Gender.Male,
 ): Member {
   const result = db
     .prepare(

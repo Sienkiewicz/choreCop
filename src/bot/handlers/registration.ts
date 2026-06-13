@@ -9,6 +9,7 @@ import {
   resetGroup,
 } from "../../db/groups.js";
 import { getActiveRules } from "../../db/rules.js";
+import { Role, Gender } from "../../types.js";
 import { Markup } from "telegraf";
 import {
   setupWelcomeKeyboard,
@@ -40,7 +41,7 @@ export function registerRegistrationHandlers(
     if (!ctx.chat) return;
 
     if (ctx.chat.type === "private") {
-      if (ctx.group && ctx.member?.role === "dad") {
+      if (ctx.group && ctx.member?.role === Role.Dad) {
         const hasKids = getActiveKids(db, ctx.group.id).length > 0;
         await ctx.reply("⚙️ Меню керування:", adminMenuKeyboard(hasKids));
       }
@@ -49,7 +50,7 @@ export function registerRegistrationHandlers(
 
     const existing = ctx.group;
     if (existing) {
-      if (ctx.member?.role !== "dad") return;
+      if (ctx.member?.role !== Role.Dad) return;
       const hasKids = getActiveKids(db, existing.id).length > 0;
       await ctx.reply(
         "Сім'ю вже налаштовано. Використовуйте /menu для керування.",
@@ -80,7 +81,7 @@ export function registerRegistrationHandlers(
     ctx.group = group;
 
     const firstName = ctx.from?.first_name ?? "Тато";
-    const dad = addMember(db, group.id, firstName, "dad");
+    const dad = addMember(db, group.id, firstName, Role.Dad);
     if (ctx.from) linkMember(db, dad.id, ctx.from.id);
 
     await ctx.editMessageText(
@@ -90,7 +91,7 @@ export function registerRegistrationHandlers(
   });
 
   bot.command("add_member", async (ctx) => {
-    if (!ctx.group || ctx.member?.role !== "dad") return;
+    if (!ctx.group || ctx.member?.role !== Role.Dad) return;
     const args = ctx.message.text.split(" ").slice(1);
     if (args.length === 0) {
       await ctx.reply(
@@ -107,7 +108,7 @@ export function registerRegistrationHandlers(
   });
 
   bot.action(/^setup:role:(mom|kid):(male|female)$/, async (ctx) => {
-    if (!ctx.chat || !ctx.group || ctx.member?.role !== "dad") {
+    if (!ctx.chat || !ctx.group || ctx.member?.role !== Role.Dad) {
       await ctx.answerCbQuery();
       return;
     }
@@ -118,30 +119,29 @@ export function registerRegistrationHandlers(
       return;
     }
     await ctx.answerCbQuery();
+    const [, role, gender] = ctx.match;
 
-    const role = ctx.match[1] as "mom" | "kid";
-    const gender = ctx.match[2] as "male" | "female";
     const kidCount =
-      role === "kid" ? getActiveKids(db, ctx.group.id).length : undefined;
+      role === Role.Kid ? getActiveKids(db, ctx.group.id).length : undefined;
     const username = name.startsWith("@") ? name.slice(1) : undefined;
     addMember(
       db,
       ctx.group.id,
       name,
-      role,
+      role as Role,
       kidCount !== undefined ? kidCount + 1 : undefined,
       username,
-      gender,
+      gender as Gender,
     );
     clearPendingMemberName(ctx.chat.id);
 
     const roleLabel =
-      role === "mom"
+      role === Role.Mom
         ? "Мама 👩"
-        : gender === "female"
+        : gender === Gender.Female
           ? "Дівчинка 👧"
           : "Хлопець 👦";
-    const added = gender === "female" ? "додана" : "доданий";
+    const added = gender === Gender.Female ? "додана" : "доданий";
     await ctx.editMessageText(`✅ <b>${name}</b> ${added} як ${roleLabel}.`, {
       parse_mode: "HTML",
     });
@@ -152,14 +152,14 @@ export function registerRegistrationHandlers(
       await ctx.reply("Спочатку налаштуйте сім'ю командою /start.");
       return;
     }
-    if (ctx.member?.role !== "dad") return;
+    if (ctx.member?.role !== Role.Dad) return;
     const hasKids = getActiveKids(db, ctx.group.id).length > 0;
     await ctx.reply("⚙️ Меню керування:", adminMenuKeyboard(hasKids));
   });
 
   bot.command("reset", async (ctx) => {
     if (!ctx.chat || ctx.chat.type === "private") return;
-    if (!ctx.group || ctx.member?.role !== "dad") return;
+    if (!ctx.group || ctx.member?.role !== Role.Dad) return;
     await ctx.reply(
       "⚠️ <b>Увага!</b> Це видалить усі дані сім'ї: учасників, завдання, правила та історію чергувань. Дію неможливо скасувати.",
       {
@@ -174,7 +174,7 @@ export function registerRegistrationHandlers(
 
   bot.action("reset:confirm", async (ctx) => {
     await ctx.answerCbQuery();
-    if (!ctx.group || ctx.member?.role !== "dad") return;
+    if (!ctx.group || ctx.member?.role !== Role.Dad) return;
     resetGroup(db, ctx.group.id);
     ctx.group = null;
     await ctx.editMessageText(
@@ -192,7 +192,7 @@ export function registerRegistrationHandlers(
       await ctx.reply("Спочатку налаштуйте сім'ю командою /start.");
       return;
     }
-    if (ctx.member?.role !== "dad" && ctx.member?.role !== "mom") return;
+    if (ctx.member?.role !== Role.Dad && ctx.member?.role !== Role.Mom) return;
 
     const rules = getActiveRules(db, ctx.group.id);
     if (rules.length === 0) {

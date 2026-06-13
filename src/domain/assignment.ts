@@ -1,5 +1,11 @@
-import type { Member, WorkRule, FixedAssignment, RotationState } from '../types.js';
-import { getNextPositions } from './rotation.js';
+import type {
+  Member,
+  WorkRule,
+  FixedAssignment,
+  RotationState,
+} from "../types.js";
+import { RotationMode } from "../types.js";
+import { getNextPositions } from "./rotation.js";
 
 export function getAssignedMembers(
   rule: WorkRule,
@@ -8,18 +14,18 @@ export function getAssignedMembers(
   rotationState: RotationState | null,
 ): Member[] {
   switch (rule.rotation_mode) {
-    case 'all':
+    case RotationMode.All:
       return kids;
 
-    case 'fixed': {
-      const fixedIds = new Set(fixedAssignments.map(a => a.member_id));
-      return kids.filter(k => fixedIds.has(k.id));
+    case RotationMode.Fixed: {
+      const fixedIds = new Set(fixedAssignments.map((a) => a.member_id));
+      return kids.filter((k) => fixedIds.has(k.id));
     }
 
-    case 'round_robin': {
+    case RotationMode.RoundRobin: {
       const pos = rotationState?.current_pos ?? 0;
       const positions = getNextPositions(pos, kids.length, rule.workers_count);
-      return positions.map(i => kids[i]);
+      return positions.map((i) => kids[i]);
     }
   }
 }
