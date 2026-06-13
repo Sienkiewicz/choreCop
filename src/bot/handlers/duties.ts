@@ -1,27 +1,27 @@
 import type { Telegraf } from "telegraf";
 import Database from "better-sqlite3";
-import type { BotContext } from "../context.js";
+import type { BotContext } from "../context";
 import {
   getDutyById,
   markDone,
   requestApproval,
   approveOrReject,
   getPendingDuties,
-} from "../../db/duties.js";
+} from "@src/db/duties";
 import {
   findGroupById,
   findMemberByTelegramId,
   getAllMembers,
   getParents,
-} from "../../db/groups.js";
-import { getActiveRules } from "../../db/rules.js";
-import { Role, DutyStatus } from "../../types.js";
+} from "@src/db/groups";
+import { getActiveRules } from "@src/db/rules";
+import { Role, DutyStatus } from "@src/types";
 import {
   buildApprovalMessage,
   buildTaskListMessage,
-} from "../keyboards/duties.js";
-import { updatePinnedSummary } from "../../scheduler/reminders.js";
-import { trackAndPrune } from "../helpers/messages.js";
+} from "../keyboards/duties";
+import { updatePinnedSummary } from "@src/scheduler/reminders";
+import { trackAndPrune } from "../helpers/messages";
 
 const parents: Role[] = [Role.Dad, Role.Mom];
 

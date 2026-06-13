@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { matchesDate } from '../../src/domain/schedule';
+import { matchesDate } from "@src/domain/schedule";
 
 const SAT = new Date('2026-05-30');
 const TUE = new Date('2026-06-02');

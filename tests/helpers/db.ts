@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { applySchema } from '../../src/db/schema.js';
+import { applySchema } from "@src/db/schema";
 
 export function createTestDb(): Database.Database {
   const db = new Database(':memory:');

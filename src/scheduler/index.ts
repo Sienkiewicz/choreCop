@@ -1,9 +1,9 @@
 import cron from "node-cron";
 import type { Telegram } from "telegraf";
 import Database from "better-sqlite3";
-import { getAllGroups } from "../db/groups.js";
-import { generateDutiesForDate } from "./generate.js";
-import { sendDailySummary, sendReminder } from "./reminders.js";
+import { getAllGroups } from "@src/db/groups";
+import { generateDutiesForDate } from "./generate";
+import { sendDailySummary, sendReminder } from "./reminders";
 
 interface BotLike {
   telegram: Telegram;

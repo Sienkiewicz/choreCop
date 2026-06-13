@@ -1,13 +1,13 @@
 import type { MiddlewareFn } from "telegraf";
 import Database from "better-sqlite3";
-import type { BotContext } from "../context.js";
+import type { BotContext } from "../context";
 import {
   findGroupByChatId,
   findMemberByTelegramId,
   findMemberByUsername,
   linkMember,
   findMemberWithGroupByTelegramId,
-} from "../../db/groups.js";
+} from "@src/db/groups";
 
 const ANONYMOUS_ADMIN_ID = 1087968824;
 

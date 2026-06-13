@@ -4,7 +4,7 @@ import {
   trackMessage,
   getMessagesToDelete,
   deleteTrackedMessage,
-} from "../../db/messages.js";
+} from "@src/db/messages";
 
 const KEEP_LAST = 4;
 

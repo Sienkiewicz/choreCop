@@ -1,12 +1,12 @@
 import "dotenv/config";
 import { Telegraf } from "telegraf";
-import { getDb, closeDb } from "./db/index.js";
-import { registerCronJobs } from "./scheduler/index.js";
-import { registerHandlers } from "./bot/handlers/index.js";
-import { groupMiddleware } from "./bot/middleware/group.js";
-import { getAllGroups } from "./db/groups.js";
-import { generateDutiesForDate } from "./scheduler/generate.js";
-import type { BotContext } from "./bot/context.js";
+import { getDb, closeDb } from "./db/index";
+import { registerCronJobs } from "./scheduler/index";
+import { registerHandlers } from "./bot/handlers/index";
+import { groupMiddleware } from "./bot/middleware/group";
+import { getAllGroups } from "./db/groups";
+import { generateDutiesForDate } from "./scheduler/generate";
+import type { BotContext } from "./bot/context";
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 if (!BOT_TOKEN) throw new Error("BOT_TOKEN environment variable is required");

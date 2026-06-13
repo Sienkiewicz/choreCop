@@ -2,11 +2,11 @@ import "dotenv/config";
 import { Telegraf } from "telegraf";
 import Database from "better-sqlite3";
 import path from "path";
-import { applySchema } from "../src/db/schema.js";
-import { getAllGroups } from "../src/db/groups.js";
-import { generateDutiesForDate, toDateStr } from "../src/scheduler/generate.js";
-import { sendDailySummary, sendReminder } from "../src/scheduler/reminders.js";
-import type { BotContext } from "../src/bot/context.js";
+import { applySchema } from "../src/db/schema";
+import { getAllGroups } from "../src/db/groups";
+import { generateDutiesForDate, toDateStr } from "../src/scheduler/generate";
+import { sendDailySummary, sendReminder } from "../src/scheduler/reminders";
+import type { BotContext } from "../src/bot/context";
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((a) => a.replace("--", "").split("=")),

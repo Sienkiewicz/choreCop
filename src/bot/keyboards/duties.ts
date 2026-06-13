@@ -1,9 +1,9 @@
 import { Markup } from "telegraf";
 import Database from "better-sqlite3";
-import type { Duty, Member } from "../../types.js";
-import { DutyStatus, Gender } from "../../types.js";
-import { getAllMembers } from "../../db/groups.js";
-import { getActiveRules } from "../../db/rules.js";
+import type { Duty, Member } from "@src/types";
+import { DutyStatus, Gender } from "@src/types";
+import { getAllMembers } from "@src/db/groups";
+import { getActiveRules } from "@src/db/rules";
 
 interface MessagePayload {
   text: string;

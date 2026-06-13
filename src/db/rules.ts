@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import type { WorkRule, FixedAssignment } from "../types.js";
+import type { WorkRule, FixedAssignment } from "@src/types";
 
 export function createRule(
   db: Database.Database,

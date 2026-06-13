@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import Database from "better-sqlite3";
-import { applySchema } from "../../src/db/schema";
+import { applySchema } from "@src/db/schema";
 
 let db: Database.Database;
 

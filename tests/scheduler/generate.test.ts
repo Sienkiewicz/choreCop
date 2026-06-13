@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import Database from "better-sqlite3";
 import { createTestDb } from "../helpers/db";
-import { upsertGroup, addMember } from "../../src/db/groups";
-import { createRule, setFixedAssignments } from "../../src/db/rules";
-import { getDutiesForDate } from "../../src/db/duties";
-import { getRotationState } from "../../src/db/rotation";
-import { generateDutiesForDate, toDateStr } from "../../src/scheduler/generate";
+import { upsertGroup, addMember } from "@src/db/groups";
+import { createRule, setFixedAssignments } from "@src/db/rules";
+import { getDutiesForDate } from "@src/db/duties";
+import { getRotationState } from "@src/db/rotation";
+import { generateDutiesForDate, toDateStr } from "@src/scheduler/generate";
 
 let db: Database.Database;
 let groupId: number;

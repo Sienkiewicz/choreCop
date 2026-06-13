@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
-import type { Group, Member } from "../types.js";
-import { Gender } from "../types.js";
+import type { Group, Member } from "@src/types";
+import { Gender } from "@src/types";
 
 export function upsertGroup(
   db: Database.Database,

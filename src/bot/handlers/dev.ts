@@ -1,22 +1,22 @@
 import type { Telegraf } from "telegraf";
 import Database from "better-sqlite3";
-import type { BotContext } from "../context.js";
-import { generateDutiesForDate, toDateStr } from "../../scheduler/generate.js";
+import type { BotContext } from "../context";
+import { generateDutiesForDate, toDateStr } from "@src/scheduler/generate";
 import {
   sendDailySummary,
   sendReminder,
   updatePinnedSummary,
-} from "../../scheduler/reminders.js";
+} from "@src/scheduler/reminders";
 import {
   getDutiesForDate,
   getDutyById,
   markDone,
   requestApproval,
   approveOrReject,
-} from "../../db/duties.js";
-import { getAllMembers, getParents } from "../../db/groups.js";
-import { getActiveRules } from "../../db/rules.js";
-import { Role, DutyStatus } from "../../types.js";
+} from "@src/db/duties";
+import { getAllMembers, getParents } from "@src/db/groups";
+import { getActiveRules } from "@src/db/rules";
+import { Role, DutyStatus } from "@src/types";
 
 function parseDate(args: string[]): { date: Date; dateStr: string } {
   const arg = args[0];

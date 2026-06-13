@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import Database from "better-sqlite3";
 import { createTestDb } from "../helpers/db";
-import { upsertGroup, addMember } from "../../src/db/groups";
+import { upsertGroup, addMember } from "@src/db/groups";
 import {
   createRule,
   getActiveRules,
   setFixedAssignments,
   getFixedAssignments,
-} from "../../src/db/rules";
+} from "@src/db/rules";
 
 let db: Database.Database;
 let groupId: number;

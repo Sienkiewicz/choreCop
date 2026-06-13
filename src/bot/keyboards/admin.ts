@@ -1,6 +1,6 @@
 import { Markup } from "telegraf";
-import type { Member, WorkRule } from "../../types.js";
-import { Role, RotationMode } from "../../types.js";
+import type { Member, WorkRule } from "@src/types";
+import { Role, RotationMode } from "@src/types";
 
 export const RULE_NAME_PRESETS = [
   "Посудомийна",

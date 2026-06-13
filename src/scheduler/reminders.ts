@@ -4,16 +4,16 @@ import Database from "better-sqlite3";
 interface BotLike {
   telegram: Telegram;
 }
-import { DutyStatus } from "../types.js";
-import { getAllGroups } from "../db/groups.js";
-import { getDutiesForDate, getPendingDuties } from "../db/duties.js";
-import { saveSummaryMessageId, getSummaryMessageId } from "../db/summaries.js";
+import { DutyStatus } from "@src/types";
+import { getAllGroups } from "@src/db/groups";
+import { getDutiesForDate, getPendingDuties } from "@src/db/duties";
+import { saveSummaryMessageId, getSummaryMessageId } from "@src/db/summaries";
 import {
   buildSummaryMessage,
   buildReminderMessage,
-} from "../bot/keyboards/duties.js";
-import { trackAndPrune } from "../bot/helpers/messages.js";
-import { toDateStr } from "./generate.js";
+} from "@src/bot/keyboards/duties";
+import { trackAndPrune } from "@src/bot/helpers/messages";
+import { toDateStr } from "./generate";
 
 export async function sendDailySummary(
   bot: BotLike,

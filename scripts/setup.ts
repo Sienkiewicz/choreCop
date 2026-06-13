@@ -1,14 +1,14 @@
 import "dotenv/config";
-import { getDb } from "../src/db/index.js";
+import { getDb } from "../src/db/index";
 import {
   upsertGroup,
   addMember,
   getAllMembers,
   getActiveKids,
-} from "../src/db/groups.js";
-import { createRule, getActiveRules } from "../src/db/rules.js";
-import type { WorkRule } from "../src/types.js";
-import { Role, RotationMode } from "../src/types.js";
+} from "../src/db/groups";
+import { createRule, getActiveRules } from "../src/db/rules";
+import type { WorkRule } from "../src/types";
+import { Role, RotationMode } from "../src/types";
 
 const db = getDb();
 const [, , command, ...args] = process.argv;

@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { getAssignedMembers } from "../../src/domain/assignment";
+import { getAssignedMembers } from "@src/domain/assignment";
 import type {
   Member,
   WorkRule,
   FixedAssignment,
   RotationState,
-} from "../../src/types";
+} from "@src/types";
 
 const kids: Member[] = [
   {

@@ -12,9 +12,9 @@ import {
   getUnlinkedMembers,
   getAllGroups,
   resetGroup,
-} from "../../src/db/groups";
-import { createRule } from "../../src/db/rules";
-import { createDuty } from "../../src/db/duties";
+} from "@src/db/groups";
+import { createRule } from "@src/db/rules";
+import { createDuty } from "@src/db/duties";
 
 let db: Database.Database;
 

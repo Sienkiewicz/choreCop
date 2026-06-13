@@ -1,33 +1,33 @@
 import type { Telegraf } from "telegraf";
 import Database from "better-sqlite3";
-import type { BotContext } from "../context.js";
+import type { BotContext } from "../context";
 import {
   upsertGroup,
   addMember,
   linkMember,
   getActiveKids,
   resetGroup,
-} from "../../db/groups.js";
-import { getActiveRules } from "../../db/rules.js";
-import { Role, Gender } from "../../types.js";
+} from "@src/db/groups";
+import { getActiveRules } from "@src/db/rules";
+import { Role, Gender } from "@src/types";
 import { Markup } from "telegraf";
 import {
   setupWelcomeKeyboard,
   addMemberRoleKeyboard,
   adminMenuKeyboard,
-} from "../keyboards/registration.js";
+} from "../keyboards/registration";
 import {
   setPendingMemberName,
   getPendingMemberName,
   clearPendingMemberName,
-} from "../state/pendingMember.js";
-import { MODE_LABEL } from "../keyboards/admin.js";
+} from "../state/pendingMember";
+import { MODE_LABEL } from "../keyboards/admin";
 
 async function isGroupAdmin(ctx: BotContext): Promise<boolean> {
   if (!ctx.chat || !ctx.from) return false;
   try {
     const member = await ctx.getChatMember(ctx.from.id);
-    return member.status === "administrator" || member.status === "creator";
+    return ["administrator", "creator"].includes(member.status);
   } catch {
     return false;
   }

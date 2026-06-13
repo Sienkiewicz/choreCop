@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import type { Duty } from "../types.js";
+import type { Duty } from "@src/types";
 
 export function createDuty(
   db: Database.Database,

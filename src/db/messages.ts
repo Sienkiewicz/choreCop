@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import type { BotMessage } from "../types.js";
+import type { BotMessage } from "@src/types";
 
 export function trackMessage(
   db: Database.Database,

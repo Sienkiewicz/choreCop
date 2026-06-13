@@ -1,4 +1,4 @@
-import type { RotationMode } from "../../types.js";
+import type { RotationMode } from "@src/types";
 
 export const WizardStep = {
   Name: "name",

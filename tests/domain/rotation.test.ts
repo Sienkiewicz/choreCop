@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getNextPositions, advancePosition } from '../../src/domain/rotation';
+import { getNextPositions, advancePosition } from "@src/domain/rotation";
 
 describe('getNextPositions', () => {
   it('returns single position for 1 worker', () => {

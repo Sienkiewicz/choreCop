@@ -1,29 +1,29 @@
 import type { Telegraf } from "telegraf";
 import { Markup } from "telegraf";
 import Database from "better-sqlite3";
-import type { BotContext } from "../context.js";
+import type { BotContext } from "../context";
 import {
   createRule,
   setFixedAssignments,
   getActiveRules,
   getFixedAssignments,
   deactivateRule,
-} from "../../db/rules.js";
+} from "@src/db/rules";
 import {
   getActiveKids,
   getAllMembers,
   addMember,
   linkMember,
   clearGroup,
-} from "../../db/groups.js";
+} from "@src/db/groups";
 import {
   initWizard,
   getWizard,
   updateWizard,
   clearWizard,
   WizardStep,
-} from "../state/wizard.js";
-import { Role, RotationMode } from "../../types.js";
+} from "../state/wizard";
+import { Role, RotationMode } from "@src/types";
 import {
   namePickerKeyboard,
   dayPickerKeyboard,
@@ -39,9 +39,9 @@ import {
   dayNames,
   MODE_LABEL,
   ROLE_LABEL,
-} from "../keyboards/admin.js";
-import { adminMenuKeyboard } from "../keyboards/registration.js";
-import { trackAndPrune } from "../helpers/messages.js";
+} from "../keyboards/admin";
+import { adminMenuKeyboard } from "../keyboards/registration";
+import { trackAndPrune } from "../helpers/messages";
 
 export function registerAdminHandlers(
   bot: Telegraf<BotContext>,

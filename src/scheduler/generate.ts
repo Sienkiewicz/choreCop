@@ -1,12 +1,12 @@
 import Database from "better-sqlite3";
-import { RotationMode } from "../types.js";
-import { getActiveRules, getFixedAssignments } from "../db/rules.js";
-import { getActiveKids } from "../db/groups.js";
-import { createDuty, hasDutyForDate } from "../db/duties.js";
-import { getRotationState, upsertRotationState } from "../db/rotation.js";
-import { matchesDate } from "../domain/schedule.js";
-import { getAssignedMembers } from "../domain/assignment.js";
-import { advancePosition } from "../domain/rotation.js";
+import { RotationMode } from "@src/types";
+import { getActiveRules, getFixedAssignments } from "@src/db/rules";
+import { getActiveKids } from "@src/db/groups";
+import { createDuty, hasDutyForDate } from "@src/db/duties";
+import { getRotationState, upsertRotationState } from "@src/db/rotation";
+import { matchesDate } from "@src/domain/schedule";
+import { getAssignedMembers } from "@src/domain/assignment";
+import { advancePosition } from "@src/domain/rotation";
 
 export function toDateStr(date: Date): string {
   const year = date.getFullYear();

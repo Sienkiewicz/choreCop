@@ -3,9 +3,9 @@ import type {
   WorkRule,
   FixedAssignment,
   RotationState,
-} from "../types.js";
-import { RotationMode } from "../types.js";
-import { getNextPositions } from "./rotation.js";
+} from "@src/types";
+import { RotationMode } from "@src/types";
+import { getNextPositions } from "./rotation";
 
 export function getAssignedMembers(
   rule: WorkRule,

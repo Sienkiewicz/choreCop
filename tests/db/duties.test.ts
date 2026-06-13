@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import Database from "better-sqlite3";
 import { createTestDb } from "../helpers/db";
-import { upsertGroup, addMember } from "../../src/db/groups";
-import { createRule } from "../../src/db/rules";
+import { upsertGroup, addMember } from "@src/db/groups";
+import { createRule } from "@src/db/rules";
 import {
   createDuty,
   getDutiesForDate,
@@ -12,12 +12,9 @@ import {
   approveOrReject,
   hasDutyForDate,
   getPendingDuties,
-} from "../../src/db/duties";
-import { getRotationState, upsertRotationState } from "../../src/db/rotation";
-import {
-  saveSummaryMessageId,
-  getSummaryMessageId,
-} from "../../src/db/summaries";
+} from "@src/db/duties";
+import { getRotationState, upsertRotationState } from "@src/db/rotation";
+import { saveSummaryMessageId, getSummaryMessageId } from "@src/db/summaries";
 
 let db: Database.Database;
 let groupId: number;
