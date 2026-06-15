@@ -158,8 +158,12 @@ export function registerRegistrationHandlers(
   });
 
   bot.command("reset", async (ctx) => {
-    if (!ctx.chat || ctx.chat.type === "private") return;
-    if (!ctx.group || ctx.member?.role !== Role.Dad) return;
+    if (!ctx.chat || ctx.chat.type !== "private") return;
+    if (
+      !ctx.group ||
+      (ctx.member?.role !== Role.Dad && ctx.member?.role !== Role.Mom)
+    )
+      return;
     await ctx.reply(
       "⚠️ <b>Увага!</b> Це видалить усі дані сім'ї: учасників, завдання, правила та історію чергувань. Дію неможливо скасувати.",
       {
@@ -174,11 +178,15 @@ export function registerRegistrationHandlers(
 
   bot.action("reset:confirm", async (ctx) => {
     await ctx.answerCbQuery();
-    if (!ctx.group || ctx.member?.role !== Role.Dad) return;
+    if (
+      !ctx.group ||
+      (ctx.member?.role !== Role.Dad && ctx.member?.role !== Role.Mom)
+    )
+      return;
     resetGroup(db, ctx.group.id);
     ctx.group = null;
     await ctx.editMessageText(
-      "✅ Дані сім'ї видалено. Надішліть /start щоб почати заново.",
+      "✅ Дані сім'ї видалено. Перейдіть у групу сім'ї та надішліть /start, щоб налаштувати все знову.",
     );
   });
 
