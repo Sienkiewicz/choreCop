@@ -1,0 +1,20 @@
+services:
+  chorecop:
+    build: .
+    container_name: chorecop
+    restart: unless-stopped
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      TZ: ${TZ:-Europe/Warsaw}
+      NODE_ENV: production
+      DATABASE_PATH: /app/data/chorecop.db
+    ports:
+      - "3000:3000"
+    volumes:
+      - /DATA/AppData/chorecop:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
