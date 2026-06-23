@@ -1,6 +1,6 @@
 services:
   chorecop:
-    build: .
+    build: ./source
     container_name: chorecop
     restart: unless-stopped
     environment:
@@ -11,7 +11,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /DATA/AppData/chorecop:/app/data
+      - ./data:/app/data
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000 || exit 1"]
       interval: 30s
