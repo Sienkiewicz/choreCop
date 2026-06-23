@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { createServer } from "node:http";
 import { Telegraf } from "telegraf";
 import { getDb, closeDb } from "./db/index";
 import { registerCronJobs } from "./scheduler/index";
@@ -26,11 +27,20 @@ bot.launch().then(() => {
   );
 });
 
+const healthServer = createServer((_req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("OK");
+});
+const HEALTH_PORT = Number(process.env.HEALTH_PORT) || 3000;
+healthServer.listen(HEALTH_PORT);
+
 process.once("SIGINT", () => {
   bot.stop("SIGINT");
   closeDb();
+  healthServer.close();
 });
 process.once("SIGTERM", () => {
   bot.stop("SIGTERM");
   closeDb();
+  healthServer.close();
 });
