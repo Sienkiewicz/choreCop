@@ -62,11 +62,12 @@ export function approveOrReject(
   dutyId: number,
   approvedBy: number,
   approved: boolean,
+  doneBy?: number,
 ): void {
   if (approved) {
     db.prepare(
       "UPDATE duties SET status = 'done', approved_by = ?, done_by = ?, done_at = ? WHERE id = ?",
-    ).run(approvedBy, approvedBy, Date.now(), dutyId);
+    ).run(approvedBy, doneBy ?? approvedBy, Date.now(), dutyId);
   } else {
     db.prepare(
       "UPDATE duties SET status = 'pending', requested_by = NULL WHERE id = ?",

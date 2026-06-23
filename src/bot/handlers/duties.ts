@@ -201,7 +201,7 @@ export function registerDutyHandlers(
       return;
     }
 
-    approveOrReject(db, duty.id, approver.id, true);
+    approveOrReject(db, duty.id, approver.id, true, duty.requested_by ?? undefined);
     await ctx.answerCbQuery("✅ Схвалено!");
     await ctx.editMessageText("✅ Схвалено!");
     await updatePinnedSummary(bot, db, group.id, group.chat_id, duty.duty_date);

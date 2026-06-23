@@ -19,7 +19,7 @@ export function doneLabel(m: Member): string {
   return `${memberTag(m)} ${verb}`;
 }
 
-function statusIcon(status: Duty["status"]): string {
+export function statusIcon(status: Duty["status"]): string {
   switch (status) {
     case DutyStatus.Done:
       return "✅";
@@ -80,9 +80,22 @@ export function buildSummaryMessage(
   for (const [ruleId, ruleDuties] of groupByRule(duties)) {
     const ruleName = rules[ruleId] ?? "???";
     const parts = ruleDuties
-      .map(
-        (d) => `${statusIcon(d.status)} ${memberTag(membersMap[d.member_id])}`,
-      )
+      .map((d) => {
+        const assignee = membersMap[d.member_id];
+        const actualDoer =
+          d.done_by && d.done_by !== d.member_id
+            ? membersMap[d.done_by]
+            : null;
+        let nameStr: string;
+        if (actualDoer) {
+          const verb =
+            actualDoer.gender === Gender.Female ? "виконала" : "виконав";
+          nameStr = `${memberTag(assignee)} (${verb} ${memberTag(actualDoer)})`;
+        } else {
+          nameStr = memberTag(assignee);
+        }
+        return `${statusIcon(d.status)} ${nameStr}`;
+      })
       .join("  ");
     text += `${ruleName} — ${parts}\n`;
   }
@@ -159,4 +172,55 @@ export function buildApprovalMessage(
     ],
   ];
   return { text, reply_markup: Markup.inlineKeyboard(buttons).reply_markup };
+}
+
+export function buildTodayReport(
+  db: Database.Database,
+  groupId: number,
+  duties: Duty[],
+  date: string,
+): MessagePayload {
+  const membersMap = Object.fromEntries(
+    getAllMembers(db, groupId).map((m) => [m.id, m]),
+  );
+  const rules = Object.fromEntries(
+    getActiveRules(db, groupId).map((r) => [r.id, r.name]),
+  );
+
+  const [day, month] = formatDate(date);
+  let text = `📊 <b>Звіт за ${day} ${month}:</b>\n\n`;
+
+  if (duties.length === 0) {
+    text += "— завдань не заплановано —";
+  } else {
+    for (const d of duties) {
+      const ruleName = rules[d.rule_id] ?? "???";
+      const assignee = membersMap[d.member_id];
+      const doer = d.done_by ? membersMap[d.done_by] : null;
+      const requester = d.requested_by ? membersMap[d.requested_by] : null;
+
+      text += `${statusIcon(d.status)} <b>${ruleName}</b> — ${assignee ? memberTag(assignee) : "?"}\n`;
+
+      if (d.status === DutyStatus.Done && doer && doer.id !== d.member_id) {
+        const verb = doer.gender === Gender.Female ? "виконала" : "виконав";
+        text += `   ↳ ${verb}: ${memberTag(doer)}\n`;
+      }
+      if (d.status === DutyStatus.ApprovalPending && requester) {
+        text += `   ↳ запит від: ${memberTag(requester)}\n`;
+      }
+      if (d.done_at) {
+        const t = new Date(d.done_at);
+        const hh = String(t.getHours()).padStart(2, "0");
+        const mm = String(t.getMinutes()).padStart(2, "0");
+        text += `   ↳ виконано о ${hh}:${mm}\n`;
+      }
+    }
+  }
+
+  return {
+    text,
+    reply_markup: Markup.inlineKeyboard([
+      [Markup.button.callback("⬅️ Назад", "admin:menu")],
+    ]).reply_markup,
+  };
 }

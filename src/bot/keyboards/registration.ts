@@ -25,7 +25,10 @@ export function adminMenuKeyboard(hasKids: boolean) {
         Markup.button.callback("👥 Члени сім'ї", "admin:members"),
         Markup.button.callback("📋 Поточні налаштування", "admin:overview"),
       ],
-      [Markup.button.callback("🗑 Скинути все", "admin:reset")],
+      [
+        Markup.button.callback("📊 Звіт сьогодні", "admin:today"),
+        Markup.button.callback("🗑 Скинути все", "admin:reset"),
+      ],
     ]);
   }
   return Markup.inlineKeyboard([
@@ -35,7 +38,8 @@ export function adminMenuKeyboard(hasKids: boolean) {
     ],
     [
       Markup.button.callback("📋 Поточні налаштування", "admin:overview"),
-      Markup.button.callback("🗑 Скинути все", "admin:reset"),
+      Markup.button.callback("📊 Звіт сьогодні", "admin:today"),
     ],
+    [Markup.button.callback("🗑 Скинути все", "admin:reset")],
   ]);
 }

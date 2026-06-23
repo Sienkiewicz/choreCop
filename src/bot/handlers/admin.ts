@@ -16,6 +16,7 @@ import {
   linkMember,
   clearGroup,
 } from "@src/db/groups";
+import { getDutiesForDate } from "@src/db/duties";
 import {
   initWizard,
   getWizard,
@@ -41,6 +42,7 @@ import {
   ROLE_LABEL,
 } from "../keyboards/admin";
 import { adminMenuKeyboard } from "../keyboards/registration";
+import { buildTodayReport } from "../keyboards/duties";
 import { trackAndPrune } from "../helpers/messages";
 
 export function registerAdminHandlers(
@@ -123,6 +125,22 @@ export function registerAdminHandlers(
       parse_mode: "HTML",
       ...Markup.inlineKeyboard(buttons),
     });
+  });
+
+  bot.action("admin:today", async (ctx) => {
+    await ctx.answerCbQuery();
+    if (!ctx.group || !ctx.member) return;
+    if (ctx.member.role !== Role.Dad && ctx.member.role !== Role.Mom) return;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const duties = getDutiesForDate(db, ctx.group.id, today);
+    const { text, reply_markup } = buildTodayReport(
+      db,
+      ctx.group.id,
+      duties,
+      today,
+    );
+    await ctx.editMessageText(text, { parse_mode: "HTML", reply_markup });
   });
 
   bot.action("admin:delete_rule", async (ctx) => {
